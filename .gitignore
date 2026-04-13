@@ -1,0 +1,12 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Godot-specific additions
+# Exported projects
+export_packs/
+*.pck
+
+# Build artifacts
+*.xcodeproj/
+*.xcworkspace/
