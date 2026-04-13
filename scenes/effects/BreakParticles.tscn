@@ -1,0 +1,54 @@
+[gd_resource user_type=PackedScene format=3]
+
+# =====---------------------------------------------------------------------
+# BreakParticles.tscn - Asteroid Break Effect
+# =====---------------------------------------------------------------------
+# When an asteroid breaks, this effect is spawned at its position.
+# Creates a satisfying "explosion" visual!
+# =====---------------------------------------------------------------------
+
+[ext_resource type="Script" path="res://scenes/effects/BreakParticles.gd" id="1"]
+
+[node name="BreakParticles" type="GPUParticles2D" instance=true]
+parent = "Node2D:2"
+script = ext_resource("1")
+# Position where asteroid broke
+position = Vector2(0, 0)
+
+# Particle settings
+/lifetime/
+min_time = 0.5
+max_time = 0.8
+# Radial explosion of particles
+radial_spread = 3.14159
+# Color variation
+color_variation = 0.3
+# Size of particles
+min_radius = 2
+max_radius = 5
+# Particle count
+max_particles = 20
+# Loop and autoplay
+loop = true
+autoplay = true
+/texture/
+texture = "res://assets/sprites/asteroid.png"
+/
+
+# Fallback to a simple shape until real assets are ready
+[node name="FallbackRect" type="ColorRect" instance=true]
+parent = "BreakParticles:1"
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+# White particles (explosion look)
+color = Color(1, 1, 0.8, 1)
+# Small size
+size = Vector2(5, 5)
+
+# =====---------------------------------------------------------------------
+# Node Names
+# =====---------------------------------------------------------------------
+# particle_container = "BreakParticles:1"
+# =====---------------------------------------------------------------------

@@ -1,0 +1,56 @@
+[gd_resource user_type=PackedScene format=3]
+
+# =====---------------------------------------------------------------------
+# UpgradeShop.tscn - Between-Round Upgrade Screen
+# =====---------------------------------------------------------------------
+# This scene shows between rounds where you can spend currency on upgrades.
+# Phase 1: Just a "Next Round" button
+# Phase 4: Full upgrade tree UI with treeview
+# =====---------------------------------------------------------------------
+
+[node name="UpgradeShop" type="CanvasLayer" instance=true]
+parent = "Node2D:2"
+
+[node name="ShopTitle" type="Label" instance=true]
+parent = "UpgradeShop:1"
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 100.0
+text = "Upgrade Shop"
+/custom_style_override/
+font_size = 32
+/font_color_override/
+color = Color(0.8, 0.2, 0.2, 1)
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CurrencyDisplay" type="Label" instance=true]
+parent = "UpgradeShop:1"
+offset_left = 0.0
+offset_top = -50.0
+offset_right = 0.0
+offset_bottom = -50.0
+text = "Currency: %d"
+/custom_style_override/
+font_size = 24
+/font_color_override/
+color = Color(1, 0.8, 0.2, 1)
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NextRoundButton" type="Button" instance=true]
+parent = "UpgradeShop:1"
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+text = "Next Round"
+/font_color_override/
+color = Color(0.2, 0.8, 0.2, 1)
+
+# =====---------------------------------------------------------------------
+# Node Names (for connecting from Main.gd)
+# =====---------------------------------------------------------------------
+# upgrade_shop.get_node("NextRoundButton")
+# =====---------------------------------------------------------------------

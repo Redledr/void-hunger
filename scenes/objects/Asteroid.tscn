@@ -1,0 +1,42 @@
+[gd_resource user_type=PackedScene format=3]
+
+# =====---------------------------------------------------------------------
+# Asteroid.tscn - Orbiting Asteroid
+# =====---------------------------------------------------------------------
+# This asteroid orbits around the center point during rounds.
+# When the Breaker overlaps it, damage is applied.
+# When health reaches 0, it breaks and emits object_destroyed signal.
+# =====---------------------------------------------------------------------
+
+[ext_resource type="Script" path="res://scenes/objects/Asteroid.gd" id="1"]
+
+[node name="Asteroid" type="ColorRect" instance=true]
+parent = "Node2D:2"
+script = ext_resource("1")
+# Gray asteroid color
+color = Color(0.3, 0.3, 0.35, 1)
+# Size (will be set by GameWorld)
+custom_minimum_size = Vector2(60, 60)
+
+[node name="HealthBar" type="ProgressBar" instance=true]
+parent = "Asteroid:1"
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+max_value = 30.0
+color = Color(0.4, 0.1, 0.1, 1)
+/progress/
+ratio = 1.0
+
+[node name="ParticleContainer" type="Node2D" instance=true]
+parent = "Asteroid:1"
+# Container for break particles (empty until break)
+# Will be populated with BreakParticles scene on destruction
+
+# =====---------------------------------------------------------------------
+# Node Names (for connecting from other scenes)
+# =====---------------------------------------------------------------------
+# asteroid.get_node("HealthBar")
+# asteroid.get_node("ParticleContainer")
+# =====---------------------------------------------------------------------

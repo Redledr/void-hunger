@@ -10,14 +10,45 @@ config_version=5
 
 [application]
 
-config/name="A Game About Feeding A Black Hole"
+config/name="Void Hunger - Black Hole Incremental"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
+config/description="A minimalist incremental game. Feed a black hole by breaking celestial objects."
+config/runtime/ignore_gdextension_files=true
+config/embed_scene_packages=false
+config/rendering_method="Compatibility"
+
+# =====---------------------------------------------------------------------
+# Autoloads - Scripts that run when the project starts
+# =====---------------------------------------------------------------------
+[autoload]
+
+GameState="res://scripts/autoloads/GameState.gd"
+EventBus="res://scripts/autoloads/EventBus.gd"
+UpgradeManager="res://scripts/autoloads/UpgradeManager.gd"
+# =====---------------------------------------------------------------------
+# End of Autoloads
+# =====---------------------------------------------------------------------
 
 [physics]
 
 3d/physics_engine="Jolt Physics"
+3d/default_3d_project_enabled=false
 
 [rendering]
 
+rendering_method="Compatibility"
 rendering_device/driver.windows="d3d12"
+rendering/multi_threaded=true
+rendering/warn_when_using_compatibility_mode=true
+
+[export_presets]
+# =====---------------------------------------------------------------------
+# Export Presets - Configure here for building
+# =====---------------------------------------------------------------------
+[preset.1]
+config/feature_pack="4.6"
+config/icon="res://icon.svg"
+config/main_scene="res://scenes/main/Main.tscn"
+config/name="Void Hunger (Windows)"
+config/template="windows-desktop.1"

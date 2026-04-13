@@ -22,12 +22,16 @@ extends Node
 # Signal: object_destroyed
 # --------------------------------------------------------------------------
 # Emitted when an orbiting object is destroyed (broken by the Breaker)
-# Connect to this when you want to earn currency for breaking objects.
+# Other scenes (like GameWorld) connect to this to earn currency.
 #
-# Example:
-#   func on_asteroid_destroyed(value: int, position: Vector2):
+# Example connection in GameWorld.gd:
+#   EventBus.object_destroyed.connect(_on_object_destroyed)
+#
+# Example handler:
+#   func _on_object_destroyed(value: int, position: Vector2):
 #       GameState.add_currency(value)
-#       print("Destroyed asteroid worth", value, "mass units")
+#       GameState.add_mass(mass_per_object)
+#       print("Object destroyed for", value, "currency!")
 #
 # Parameters:
 #   value: int - Currency value gained when object is destroyed

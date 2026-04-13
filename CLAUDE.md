@@ -301,3 +301,16 @@ These are guesses. Tune them once Phase 4 is working.
 - Do not add dependencies or plugins without explicit instruction
 - Do not generate placeholder assets — use Godot primitives (ColorRect, Circle draw) until real assets exist
 - Do not implement save/load to disk until Phase 4 is complete — GameState can be in-memory only during early development
+
+---
+
+## Git Workflow
+
+After completing any task or phase gate, run:
+1. `git add .`
+2. `git commit -m "descriptive message of what was built"`
+3. `git push`
+
+Commit messages should reference the phase and what was completed.
+Example: "Phase 1 - asteroid orbit and breaker damage working"
+Do not commit broken or mid-feature code.

@@ -1,0 +1,64 @@
+[gd_resource user_type=PackedScene format=3]
+
+# =====---------------------------------------------------------------------
+# Breaker.tscn - The Damage Zone (Cursor)
+# =====---------------------------------------------------------------------
+# This follows the mouse cursor and deals damage to overlapping objects.
+# Damage is applied on a timer tick (not frame-rate dependent).
+# =====---------------------------------------------------------------------
+
+[ext_resource type="Script" path="res://scenes/breaker/Breaker.gd" id="1"]
+
+[node name="Breaker" type="Area2D" instance=true]
+parent = "Node2D:2"
+script = ext_resource("1")
+# Collision shape for damage detection
+/collision/
+shape_type = "Circle"
+radius = 40.0
+
+[node name="VisualOverlay" type="ColorRect" instance=true]
+parent = "Breaker:1"
+offset_left = -40.0
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = 40.0
+# Red damage zone color (faint, so it doesn't distract)
+color = Color(0.9, 0.2, 0.2, 0.3)
+
+[node name="DamageText" type="Label" instance=true]
+parent = "Breaker:1"
+offset_left = -40.0
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = 40.0
+text = "Breaker Zone"
+/custom_style_override/
+font_size = 10
+font_color = Color(1, 0.3, 0.3, 1)
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Timer" type="Timer" instance=true]
+parent = "Breaker:1"
+# Base attack speed: 0.5 seconds between damage ticks
+wait_time = 0.5
+one_shot = true
+
+[node name="CursorMarker" type="Marker2D" instance=true]
+parent = "Breaker:1"
+# Debug marker to show cursor position
+position = Vector2(0, 0)
+visible = false
+
+[node name="MouseFilter" type="MouseFilter" instance=true]
+parent = "Breaker:1"
+mouse_filter = "stop"
+
+# =====---------------------------------------------------------------------
+# Node Names (for connecting from other scenes)
+# =====---------------------------------------------------------------------
+# breaker.get_node("Timer")
+# breaker.get_node("VisualOverlay")
+# breaker.get_node("CursorMarker")
+# =====---------------------------------------------------------------------
