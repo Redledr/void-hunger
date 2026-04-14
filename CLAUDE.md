@@ -314,3 +314,18 @@ After completing any task or phase gate, run:
 Commit messages should reference the phase and what was completed.
 Example: "Phase 1 - asteroid orbit and breaker damage working"
 Do not commit broken or mid-feature code.
+
+
+## GDScript Rules — Godot 4.6
+
+These are hard rules. Violating them causes parse errors.
+
+- `name` is a reserved keyword — never use as a variable. Use `display_name` or `label`
+- `type` is a reserved keyword — never use as a variable. Use `object_type` or `kind`
+- `.tscn` files must start with `[gd_scene load_steps=N format=3 uid="uid://..."]`
+- Never use `PackedScene` as a top-level identifier in .tscn headers
+- All signals must be declared with `signal signal_name(param: Type)` syntax
+- Use `@export` not `export` for exported variables
+- Use `@onready` not `onready`
+- Autoloads are accessed directly by name — never use `get_node("/root/GameState")`
+- Timer-based damage only — never put damage logic in `_process()`
