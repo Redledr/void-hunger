@@ -23,7 +23,6 @@ If a node needs to exist, create it in code.
 
 ## Project Structure
 ```
-res://
 ├── Main.tscn              # Created manually once — just a Node2D with main.gd attached
 ├── scripts/
 │   ├── main.gd            # Spawns objects, holds the scene together

@@ -11,7 +11,19 @@ config_version=5
 [application]
 
 config/name="Void Hunger"
+config/version="0.0.1"
+run/main_scene="uid://c8llg14dvo15t"
 config/features=PackedStringArray("4.6", "GL Compatibility")
+
+[autoload]
+
+GameState="*uid://blk8c2gp5gndn"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/borderless=true
 
 [physics]
 
@@ -22,3 +34,7 @@ config/features=PackedStringArray("4.6", "GL Compatibility")
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+anti_aliasing/quality/msaa_2d=3
+anti_aliasing/quality/msaa_3d=3
+anti_aliasing/quality/screen_space_aa=2
+anti_aliasing/quality/use_taa=true
