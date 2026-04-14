@@ -26,7 +26,7 @@
 extends NodeName
 
 # The node name must be "GameState" to work as an Autoload
-name = "GameState"
+node_name = "GameState"
 
 # =====---------------------------------------------------------------------
 # Persistent Data (these survive rounds and game restarts)

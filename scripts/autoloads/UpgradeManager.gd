@@ -24,7 +24,7 @@
 extends NodeName
 
 # The node name must be "UpgradeManager" to work as an Autoload
-name = "UpgradeManager"
+node_name = "UpgradeManager"
 
 # =====---------------------------------------------------------------------
 # Upgrade Data Structure
