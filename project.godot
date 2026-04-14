@@ -17,10 +17,6 @@ config/run/main_scene="res://scenes/main/Main.tscn"
 
 [autoload]
 
-GameState="res://scripts/autoloads/GameState.gd"
-EventBus="res://scripts/autoloads/EventBus.gd"
-UpgradeManager="res://scripts/autoloads/UpgradeManager.gd"
-
-[rendering]
-
-renderer/rendering_method="compatibility"
+EventBus="*res://scripts/autoloads/EventBus.gd"
+GameState="*res://scripts/autoloads/GameState.gd"
+UpgradeManager="*res://scripts/autoloads/UpgradeManager.gd"

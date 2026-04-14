@@ -30,9 +30,7 @@ extends GPUParticles2D
 
 # Called when the scene is ready
 func _ready() -> void:
-	# If GPUParticles2D isn't available (e.g., on some setups),
-	# use the fallback ColorRect
-	if not GPUParticles2D.is_configured():
+	if RenderingServer.get_rendering_device() == null:
 		visible = false
 		fallback_rect.visible = true
 

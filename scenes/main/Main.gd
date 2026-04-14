@@ -32,10 +32,14 @@ extends Node2D
 
 # Called when the scene is ready
 func _ready() -> void:
-	print("Main scene ready! Starting first round. ..")
-
-	# Start the first round
+	print("Main scene ready! Starting first round...")
+	EventBus.round_started.connect(_on_round_started)
+	EventBus.round_ended.connect(_on_round_ended)
+	EventBus.upgrade_purchased.connect(_on_upgrade_purchased)
 	game_world.start_round()
+
+func _on_round_started() -> void:
+	pass
 
 # =====---------------------------------------------------------------------
 # Called when round ends (via EventBus signal)
@@ -55,14 +59,6 @@ func _on_upgrade_purchased(_upgrade_id: String) -> void:
 	# For Phase 1, no upgrades yet
 	# In Phase 4, you'd handle currency deduction here
 	pass
-
-# =====---------------------------------------------------------------------
-# Signal Connections
-# =====---------------------------------------------------------------------
-# Connect to EventBus signals
-EventBus.round_started.connect(_on_round_started)
-EventBus.round_ended.connect(_on_round_ended)
-EventBus.upgrade_purchased.connect(_on_upgrade_purchased)
 
 # =====---------------------------------------------------------------------
 # (No utility functions needed for Phase 1)
