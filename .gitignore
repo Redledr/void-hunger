@@ -10,3 +10,6 @@ export_packs/
 # Build artifacts
 *.xcodeproj/
 *.xcworkspace/
+
+# OS-specific ignores
+.code-workspace
