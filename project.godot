@@ -6,10 +6,19 @@
 ;   [section] ; section goes between []
 ;   param=value ; assign values to parameters
 
-config_version=1
+config_version=5
 
 [application]
 
 config/name="Void Hunger"
-config/features=PackedStringArray("4.6")
+config/features=PackedStringArray("4.6", "GL Compatibility")
 
+[physics]
+
+3d/physics_engine="Jolt Physics"
+
+[rendering]
+
+rendering_device/driver.windows="d3d12"
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

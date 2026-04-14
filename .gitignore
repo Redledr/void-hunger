@@ -1,20 +1,3 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
-
-# Godot-specific additions
-# Exported projects
-export_packs/
-*.pck
-
-# Build artifacts
-*.xcodeproj/
-*.xcworkspace/
-
-# OS-specific ignores
-a-game-about-feeding-a-black-hole.code-workspace
-
-#claude code stuff
-.claude/
-.remember/
-CLAUDE.md
