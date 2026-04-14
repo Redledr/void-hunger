@@ -1,6 +1,6 @@
 [gd_scene format=3]
 
-[node name="UpgradeShop" type="CanvasLayer" parent="."]
+[node name="UpgradeShop" type="CanvasLayer"]
 
 [node name="ShopTitle" type="Label" parent="UpgradeShop"]
 offset_left = 0.0
