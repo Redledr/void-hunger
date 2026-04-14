@@ -73,17 +73,17 @@ func find_upgrade(upgrade_id: String) -> Dictionary:
 			return upgrade
 	return {}
 
-func load_upgrade_data(file_path: String) -> void:
-	if not FileAccess.file_exists(file_path):
-		push_warning("Upgrade data file not found: " + file_path)
-		return
-	var file = FileAccess.open(file_path, FileAccess.READ)
-	if not file:
-		push_error("Could not open upgrade file: " + file_path)
-		return
-	var json_text = file.get_as_text()
-	var json = JSON.parse(json_text)
-	if json.error != OK:
-		push_error("Failed to parse upgrade JSON: " + file_path)
-		return
-	all_upgrades = json.data
+#func load_upgrade_data(file_path: String) -> void:
+	#if not FileAccess.file_exists(file_path):
+		#push_warning("Upgrade data file not found: " + file_path)
+		#return
+	#var file = FileAccess.open(file_path, FileAccess.READ)
+	#if not file:
+		#push_error("Could not open upgrade file: " + file_path)
+		#return
+	#var json_text = file.get_as_text()
+	#var json = JSON.parse(json_text)
+	#if json.error != OK:
+		#push_error("Failed to parse upgrade JSON: " + file_path)
+		#return
+	#all_upgrades = json.data
