@@ -12,4 +12,4 @@ export_packs/
 *.xcworkspace/
 
 # OS-specific ignores
-.code-workspace
+a-game-about-feeding-a-black-hole.code-workspace
