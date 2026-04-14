@@ -13,3 +13,7 @@ export_packs/
 
 # OS-specific ignores
 a-game-about-feeding-a-black-hole.code-workspace
+
+#claude code stuff
+.claude/
+.remember/
