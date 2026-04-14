@@ -6,17 +6,10 @@
 ;   [section] ; section goes between []
 ;   param=value ; assign values to parameters
 
-config_version=5
+config_version=1
 
 [application]
 
 config/name="Void Hunger"
 config/features=PackedStringArray("4.6")
-config/icon="res://icon.svg"
-config/run/main_scene="res://scenes/main/Main.tscn"
 
-[autoload]
-
-EventBus="*res://scripts/autoloads/EventBus.gd"
-GameState="*res://scripts/autoloads/GameState.gd"
-UpgradeManager="*res://scripts/autoloads/UpgradeManager.gd"
