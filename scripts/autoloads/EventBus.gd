@@ -36,7 +36,7 @@ extends Node
 # Parameters:
 #   value: int - Currency value gained when object is destroyed
 #   position: Vector2 - World position where the object broke
-signal object_destroyed(value: int, position: Vector2)
+signal object_destroyed(value: float, position: Vector2)
 
 # --------------------------------------------------------------------------
 # Signal: mass_gained

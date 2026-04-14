@@ -1,59 +1,26 @@
-[gd_resource user_type=PackedScene format=3]
-
-# =====---------------------------------------------------------------------
-# BlackHole.tscn - The Central Black Hole
-# =====---------------------------------------------------------------------
-# This is a placeholder that will grow as you collect mass.
-# Each stage makes it bigger - like a black hole consuming matter!
-# =====---------------------------------------------------------------------
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/black_hole/BlackHole.gd" id="1"]
 
-[node name="BlackHole" type="ColorRect" instance=true]
-parent = "Node2D:2"
-script = ext_resource("1")
-# Start as a small dark circle (Stage 1)
+[node name="BlackHole" type="ColorRect" parent="."]
+script = ExtResource("1")
 color = Color(0.05, 0.05, 0.1, 1)
-# Size grows from 64 to 256 (4x larger at max)
 custom_minimum_size = Vector2(64, 64)
-# Centered on screen
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
 
-[node name="StageLabel" type="Label" instance=true]
-parent = "BlackHole:1"
-offset_left = 0.0
-offset_top = -32.0
-offset_bottom = 32.0
-# Shows which stage the black hole is on
+[node name="StageLabel" type="Label" parent="BlackHole"]
+offset_left = -40.0
+offset_top = -20.0
+offset_right = 40.0
+offset_bottom = 20.0
 text = "Stage 1"
-# White text for visibility
-/custom_style_override/
-font_size = 24
-font_color = Color(1, 1, 1, 0.9)
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="MassLabel" type="Label" instance=true]
-parent = "BlackHole:1"
-offset_left = 0.0
-offset_top = -8.0
-offset_bottom = 8.0
-# Shows how much mass the black hole has collected
-text = "Mass: %d"
-# Smaller text below stage label
-/custom_style_override/
-font_size = 14
-font_color = Color(1, 1, 1, 0.6)
+[node name="MassLabel" type="Label" parent="BlackHole"]
+offset_left = -40.0
+offset_top = 5.0
+offset_right = 40.0
+offset_bottom = 25.0
+text = "Mass: 0"
 horizontal_alignment = 1
 vertical_alignment = 1
-
-# =====---------------------------------------------------------------------
-# Node Names (for connecting from other scenes)
-# =====---------------------------------------------------------------------
-# Connect your mass gain signal here:
-# black_hole.get_node("StageLabel")
-# black_hole.get_node("MassLabel")
-# =====---------------------------------------------------------------------

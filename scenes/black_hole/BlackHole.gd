@@ -69,7 +69,7 @@ func _on_stage_changed(new_stage: int) -> void:
 # Update all display elements based on current state
 func _update_display() -> void:
 	# Update mass label
-	mass_label.text = "Mass: %d" % mass
+	mass_label.text = "Mass: %.1f" % mass
 
 	# Calculate scale based on stage (Stage 1 = smallest, Stage 10 = largest)
 	# Base size is 64, max size is 256

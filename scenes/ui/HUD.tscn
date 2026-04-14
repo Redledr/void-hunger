@@ -1,45 +1,20 @@
-[gd_resource user_type=PackedScene format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/ui/HUD.gd" id="1"]
 
-[node name="HUD" type="CanvasLayer" instance=true]
-parent = "Node2D:2"
-script = ext_resource("1")
+[node name="HUD" type="CanvasLayer" parent="."]
+script = ExtResource("1")
 
-# Currency Label - displays current currency amount
-[node name="CurrencyLabel" type="Label" instance=true]
-parent = "HUD:1"
+[node name="CurrencyLabel" type="Label" parent="HUD"]
 offset_left = 16.0
 offset_top = 16.0
-offset_right = -16.0
-offset_bottom = -16.0
-# Text: "Currency: 0" - will update when currency changes
-text = "Currency: %d"
-# StyleSettings for clear, readable text
-/custom_style_override/
-font_size = 16
-horizontal_alignment = 1
-vertical_alignment = 1
+offset_right = 200.0
+offset_bottom = 48.0
+text = "Currency: 0"
 
-# Make text black on any background (easy to read)
-/font_color_override/
-color = Color(0.1, 0.1, 0.15, 1)
-
-# Background panel (optional, helps readability)
-[node name="Background" type="ColorRect" instance=true]
-parent = "HUD:1"
+[node name="Background" type="ColorRect" parent="HUD"]
 offset_left = 0.0
 offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
+offset_right = 1024.0
+offset_bottom = 600.0
 color = Color(0.2, 0.2, 0.25, 0.3)
-# No border, clean look
-/custom_style_override/
-border_size = 0
-
-# =====---------------------------------------------------------------------
-# Node Names (for connecting from other scenes)
-# =====---------------------------------------------------------------------
-# Connect your currency display here:
-# hud.get_node("CurrencyLabel")
-# =====---------------------------------------------------------------------

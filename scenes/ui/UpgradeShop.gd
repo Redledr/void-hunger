@@ -21,6 +21,7 @@ extends CanvasLayer
 # Node References
 # =====---------------------------------------------------------------------
 @onready var next_round_button: Button = $NextRoundButton
+@onready var currency_display: Label = $CurrencyDisplay
 
 # =====---------------------------------------------------------------------
 # Methods

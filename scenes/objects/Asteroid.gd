@@ -61,7 +61,7 @@ var _orbit_center: Vector2
 # =====---------------------------------------------------------------------
 # When this asteroid is destroyed, emit this signal
 # Connect in GameWorld.gd: EventBus.object_destroyed.connect(_handler)
-signal object_destroyed(value: int, position: Vector2)
+signal object_destroyed(value: float, position: Vector2)
 
 # =====---------------------------------------------------------------------
 # Methods

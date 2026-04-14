@@ -150,6 +150,7 @@ func spawn_asteroid() -> Node2D:
 
 	# Add to container
 	asteroids_container.add_child(asteroid)
+	asteroid.add_to_group("asteroids")
 
 	# Center initially
 	_update_position(asteroid)
@@ -185,12 +186,12 @@ func _update_position(asteroid: Node2D) -> void:
 # =====---------------------------------------------------------------------
 # Called when an asteroid is destroyed
 # =====---------------------------------------------------------------------
-func _on_asteroid_destroyed(value: int, position: Vector2) -> void:
+func _on_asteroid_destroyed(value: float, position: Vector2) -> void:
 	# Add currency to persistent total
-	GameState.add_currency(value)
+	GameState.add_currency(int(value))
 
 	# Track round earnings (for HUD display)
-	round_currency_this_round += value
+	round_currency_this_round += int(value)
 
 	# Add mass for black hole growth
 	GameState.add_mass(mass_per_object)

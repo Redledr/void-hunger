@@ -100,17 +100,14 @@ func _on_timer_timeout() -> void:
 
 # =====---------------------------------------------------------------------
 # Apply damage to overlapping objects
-# =====---------------------------------------------------------------------
 func _apply_damage() -> void:
-	# get_overlapping_bodies() gets physics bodies, but our asteroids are Node2D
-	# Use get_overlapping_layers() to get overlapping nodes
-	var overlapping_nodes = get_overlapping_layers()
-
-	for node in overlapping_nodes:
-		# Check if it's our Asteroid type
-		if node is Asteroid:
-			# Apply damage
-			node.take_damage(damage)
+	# Get all asteroids in the scene and check distance
+	var all_asteroids = get_tree().get_nodes_in_group("asteroids")
+	for asteroid in all_asteroids:
+		if asteroid is Asteroid:
+			var distance = position.distance_to(asteroid.position)
+			if distance <= radius:
+				asteroid.take_damage(damage)
 
 # =====---------------------------------------------------------------------
 # Public: Apply damage manually (for testing or upgrades)

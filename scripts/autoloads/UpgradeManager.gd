@@ -19,9 +19,9 @@ func is_upgrade_available(upgrade_id: String) -> bool:
 	var upgrade = find_upgrade(upgrade_id)
 	if upgrade.is_empty():
 		return false
-	if GameState.get_currency() < upgrade.cost:
+	if GameState.get_currency() < upgrade.get("cost", 0):
 		return false
-	for prereq_id in upgrade.prereq_ids:
+	for prereq_id in upgrade.get("prereq_ids", []):
 		if not purchased_upgrades.has(prereq_id):
 			return false
 	return true
@@ -37,21 +37,21 @@ func buy_upgrade(upgrade_id: String) -> bool:
 	if purchased_upgrades.has(upgrade_id):
 		push_warning("Already purchased: " + upgrade_id)
 		return false
-	for prereq_id in upgrade.prereq_ids:
+	for prereq_id in upgrade.get("prereq_ids", []):
 		if not purchased_upgrades.has(prereq_id):
 			push_error("Missing prerequisite: " + prereq_id)
 			return false
 
-	GameState.add_currency(-upgrade.cost)
+	GameState.add_currency(-upgrade.get("cost", 0))
 	purchased_upgrades[upgrade_id] = true
 	apply_effect(upgrade)
 	EventBus.upgrade_purchased.emit(upgrade_id)
-	print("Purchased: " + upgrade.label)
+	print("Purchased: " + str(upgrade.get("label", "Unknown")))
 	return true
 
 func apply_effect(upgrade: Dictionary) -> void:
-	var effect_type: String = upgrade.effect_type
-	var effect_value: float = upgrade.effect_value
+	var effect_type: String = upgrade.get("effect_type", "")
+	var effect_value: float = upgrade.get("effect_value", 1.0)
 	var base_value: float = active_effects.get(effect_type, 1.0)
 	active_effects[effect_type] = effect_value * base_value
 
@@ -69,7 +69,7 @@ func apply_effect(upgrade: Dictionary) -> void:
 
 func find_upgrade(upgrade_id: String) -> Dictionary:
 	for upgrade in all_upgrades:
-		if upgrade.id == upgrade_id:
+		if upgrade.get("id", "") == upgrade_id:
 			return upgrade
 	return {}
 
@@ -81,5 +81,9 @@ func load_upgrade_data(file_path: String) -> void:
 	if not file:
 		push_error("Could not open upgrade file: " + file_path)
 		return
-	var _json_text = file.get_as_text()
-	# TODO: parse json_text into all_upgrades
+	var json_text = file.get_as_text()
+	var json = JSON.parse(json_text)
+	if json.error != OK:
+		push_error("Failed to parse upgrade JSON: " + file_path)
+		return
+	all_upgrades = json.data
