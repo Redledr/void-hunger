@@ -18,12 +18,18 @@ config/features=PackedStringArray("4.6", "GL Compatibility")
 [autoload]
 
 GameState="*uid://blk8c2gp5gndn"
+ObjectData="*uid://d13e7r77e60gf"
 
 [display]
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
 window/size/borderless=true
+
+[layer_names]
+
+2d_physics/layer_1="BlackHole"
+2d_physics/layer_2="SpaceObjects"
 
 [physics]
 

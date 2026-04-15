@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://ji8f8wd5hsuv"]
+
+[ext_resource type="Script" uid="uid://desxp7xgrfwnq" path="res://scripts/ui.gd" id="1_nt7q6"]
+
+[node name="Ui" type="CanvasLayer" unique_id=1798438073]
+script = ExtResource("1_nt7q6")
+
+[node name="Panel" type="VBoxContainer" parent="." unique_id=1701771246]
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 50.0
+offset_bottom = 69.0
+
+[node name="MassLabel" type="Label" parent="Panel" unique_id=1059238478]
+layout_mode = 2
+
+[node name="SpawnButton" type="Button" parent="Panel" unique_id=184663870]
+layout_mode = 2
+
+[node name="PullButton" type="Button" parent="Panel" unique_id=225981636]
+layout_mode = 2
+
+[node name="MultiButton" type="Button" parent="Panel" unique_id=1453614472]
+layout_mode = 2
