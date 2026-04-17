@@ -33,7 +33,7 @@ func create_regular_polygon(sides: int, radius: float) -> PackedVector2Array:
 func _compare_object_mass(a: String, b: String) -> bool:
 	return ObjectData.DATA[a]["mass"] < ObjectData.DATA[b]["mass"]
 
-func setup(start_pos, p_obj_type, bh_pos, is_background = false):
+func setup(start_pos, p_obj_type, bh_pos):
 	obj_type = p_obj_type
 	black_hole_pos = bh_pos
 
@@ -43,22 +43,6 @@ func setup(start_pos, p_obj_type, bh_pos, is_background = false):
 	size = d.get("size", size)
 
 	mass_value *= GameState.get_mass_multiplier()
-
-	if is_background:
-		# Background objects: no hitbox, no absorption, static position, gray color
-		$HitArea.queue_free()
-		color = Color(0.3, 0.3, 0.3)
-		position = start_pos
-		# Set simple visual
-		var body_points = create_regular_polygon(8, size / 2.0)
-		if body is Polygon2D:
-			body.polygon = body_points
-			body.color = color
-		elif body is ColorRect:
-			body.size = Vector2(size, size)
-			body.position = -body.size / 2
-			body.color = color
-		return
 
 	# Determine shape based on mass rank
 	var sorted_types = ObjectData.DATA.keys()
