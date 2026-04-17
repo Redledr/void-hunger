@@ -19,18 +19,6 @@ const BASE_COSTS: Dictionary = {
 	"multi": 25.0,
 }
 
-# ── Mass milestones that unlock object tiers ───────────────────────
-# Keys are cumulative mass thresholds, values are the unlocked type list
-const TIER_THRESHOLDS: Dictionary = {
-	0.0:        ["asteroid"],
-	500.0:      ["asteroid", "planet"],
-	5000.0:     ["asteroid", "planet", "star"],
-	30000.0:    ["asteroid", "planet", "star", "neutron_star"],
-	80000.0:    ["asteroid", "planet", "star", "neutron_star", "starcluster"],
-	150000.0:   ["asteroid", "planet", "star", "neutron_star", "starcluster", "nebula"],
-	800000.0:   ["asteroid", "planet", "star", "neutron_star", "starcluster", "nebula", "galaxy"],
-}
-
 # ── Public API ─────────────────────────────────────────────────────
 func add_mass(amount: float) -> void:
 	mass += amount
@@ -54,9 +42,19 @@ func buy_upgrade(which: String) -> bool:
 	emit_signal("mass_changed")
 	return true
 
+func _compare_object_mass(a: String, b: String) -> bool:
+	return ObjectData.DATA[a]["mass"] < ObjectData.DATA[b]["mass"]
+
 func get_unlocked_types() -> Array:
-	var result := ["asteroid"]
-	for threshold in TIER_THRESHOLDS.keys():
-		if mass >= threshold:
-			result = TIER_THRESHOLDS[threshold]
+	var all_types := ObjectData.DATA.keys()
+	all_types.sort_custom(Callable(self, "_compare_object_mass"))
+
+	var result: Array = []
+	for type_name in all_types:
+		if mass >= ObjectData.DATA[type_name]["mass"]:
+			result.append(type_name)
+
+	if result.is_empty():
+		if all_types.size() > 0:
+			result.append(all_types[0])
 	return result

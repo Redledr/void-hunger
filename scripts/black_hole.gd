@@ -19,9 +19,9 @@ func _update_size() -> void:
 	body.position = Vector2(-current_size / 2.0, -current_size / 2.0)
 
 	# Keep the collision zone in sync with the visual.
-	var circle   := CircleShape2D.new()
-	circle.radius = current_size / 4.0
-	pull_shape.shape = circle
+	var rect := RectangleShape2D.new()
+	rect.size = Vector2(current_size, current_size)
+	pull_shape.shape = rect
 
 func _on_mass_changed() -> void:
 	call_deferred("_update_size")

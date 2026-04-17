@@ -6,6 +6,7 @@ const SPACE_OBJECT_SCENE = preload("res://scenes/space_object.tscn")
 
 @onready var black_hole = $BlackHole
 @onready var spawn_timer = $SpawnTimer
+@onready var debug_label: Label = $DebugLabel
 
 var screen_size
 var max_objects = 40
@@ -34,6 +35,21 @@ func _input(event):
 
 func _draw():
 	draw_arc(mouse_pos, NUDGE_RADIUS, 0, TAU, 64, Color(1.0, 1.0, 1.0, 0.2), 1.0)
+
+func _process(_delta):
+	_update_debug()
+
+func _update_debug():
+	var counts = {}
+	for obj in active_objects:
+		if is_instance_valid(obj):
+			counts[obj.obj_type] = counts.get(obj.obj_type, 0) + 1
+	
+	var text = "Active Objects:\n"
+	for type in counts.keys():
+		text += "%s: %d\n" % [type, counts[type]]
+	
+	debug_label.text = text
 
 func _try_nudge(click_pos: Vector2):
 	for obj in active_objects:
