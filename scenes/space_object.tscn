@@ -13,12 +13,14 @@ offset_left = -20.0
 offset_top = -20.0
 offset_right = 20.0
 offset_bottom = 20.0
+metadata/_edit_use_anchors_ = true
 
 [node name="BodyRect" type="ColorRect" parent="." unique_id=227057213]
 offset_left = -20.0
 offset_top = -20.0
 offset_right = 20.0
 offset_bottom = 20.0
+metadata/_edit_use_anchors_ = true
 
 [node name="HitArea" type="Area2D" parent="." unique_id=1101903322]
 collision_layer = 2

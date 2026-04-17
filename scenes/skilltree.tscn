@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://bj6tugu27xi02"]
+
+[ext_resource type="Script" uid="uid://tor73uwvb0i6" path="res://scripts/skilltree.gd" id="1_n6rpy"]
+[ext_resource type="Script" uid="uid://d0bntiye6uqph" path="res://scripts/viewport.gd" id="2_lqb42"]
+
+[node name="SkillTree" type="Control" unique_id=894378538 groups=["skill_tree"]]
+layout_mode = 3
+anchors_preset = 0
+mouse_filter = 1
+script = ExtResource("1_n6rpy")
+
+[node name="Viewport" type="Control" parent="." unique_id=1879360731]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("2_lqb42")
+
+[node name="Lines" type="Control" parent="Viewport" unique_id=1127551138]
+anchors_preset = 0
+
+[node name="Nodes" type="Control" parent="Viewport" unique_id=613281675]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0

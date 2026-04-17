@@ -1,15 +1,3 @@
-# black_hole.gd
-# Attach to the ROOT node of res://scenes/black_hole.tscn
-#
-# Scene structure expected:
-#   Node2D  (this script)
-#   ├─ Body     : ColorRect      — visual
-#   └─ PullZone : Area2D         — detects space objects entering
-#       └─ Shape: CollisionShape2D (CircleShape2D, updated as mass grows)
-#
-# Collision layers (set in Project Settings > Physics > 2D):
-#   Layer 1 — black hole  (PullZone lives here)
-#   Layer 2 — space objects (their HitArea lives here, mask includes layer 1)
 extends Node2D
 
 const BASE_SIZE: float = 40.0

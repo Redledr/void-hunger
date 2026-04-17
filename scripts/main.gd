@@ -1,65 +1,69 @@
-# main.gd
-# Root scene controller.  Owns the spawn timer and coordinates the
-# black hole and UI sub-scenes.
-#
-# Scene structure expected:
-#   Node2D  (this script)           — Main
-#   ├─ BlackHole  (instance of res://scenes/black_hole.tscn)
-#   ├─ UI         (instance of res://scenes/ui.tscn  — CanvasLayer)
-#   └─ SpawnTimer : Timer
 extends Node2D
 
-# Preload once at parse time — not on every spawn call.
-const SpaceObjectScene := preload("res://scenes/space_object.tscn")
+const BUILD = "nudge"
 
-@onready var spawn_timer: Timer = $SpawnTimer
+const SPACE_OBJECT_SCENE = preload("res://scenes/space_object.tscn")
 
-var screen_size: Vector2
+@onready var black_hole = $BlackHole
+@onready var spawn_timer = $SpawnTimer
 
-func _ready() -> void:
+var screen_size
+var max_objects = 40
+var active_objects: Array = []
+
+const NUDGE_RADIUS = 80.0
+const NUDGE_STRENGTH = 120.0
+
+var mouse_pos = Vector2.ZERO
+
+func _ready():
 	screen_size = get_viewport().get_visible_rect().size
-
 	spawn_timer.wait_time = GameState.get_spawn_interval()
-	spawn_timer.timeout.connect(_spawn_object)
+	spawn_timer.connect("timeout", _spawn_object)
 	spawn_timer.start()
+	GameState.mass_changed.connect(_update_spawn_timer)
 
-	GameState.mass_changed.connect(_on_mass_changed)
+func _input(event):
+	if event is InputEventMouseMotion:
+		mouse_pos = event.position
+		queue_redraw()
 
-	_setup_environment()
+	if BUILD == "nudge":
+		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			_try_nudge(event.position)
 
-func _setup_environment() -> void:
-	var env         := WorldEnvironment.new()
-	var environment := Environment.new()
+func _draw():
+	draw_arc(mouse_pos, NUDGE_RADIUS, 0, TAU, 64, Color(1.0, 1.0, 1.0, 0.2), 1.0)
 
-	environment.glow_enabled       = true
-	environment.glow_intensity     = 0.8
-	environment.glow_strength      = 1.2
-	environment.glow_bloom         = 0.2
-	environment.glow_hdr_threshold = 0.6
+func _try_nudge(click_pos: Vector2):
+	for obj in active_objects:
+		if not is_instance_valid(obj):
+			continue
+		var dist = obj.position.distance_to(click_pos)
+		if dist <= NUDGE_RADIUS:
+			var dir = (black_hole.position - obj.position).normalized()
+			obj.apply_nudge(dir, NUDGE_STRENGTH)
 
-	env.environment = environment
-	add_child(env)
+func _get_random_edge_position():
+	var side = randi() % 4
+	if side == 0:
+		return Vector2(randf() * screen_size.x, 0)
+	elif side == 1:
+		return Vector2(randf() * screen_size.x, screen_size.y)
+	elif side == 2:
+		return Vector2(0, randf() * screen_size.y)
+	else:
+		return Vector2(screen_size.x, randf() * screen_size.y)
 
-# ── Spawning ───────────────────────────────────────────────────────
-
-func _get_random_edge_position() -> Vector2:
-	match randi() % 4:
-		0: return Vector2(randf() * screen_size.x, 0)
-		1: return Vector2(randf() * screen_size.x, screen_size.y)
-		2: return Vector2(0,              randf() * screen_size.y)
-		_: return Vector2(screen_size.x,  randf() * screen_size.y)
-
-func _spawn_object() -> void:
-	var types      := GameState.get_unlocked_types()
-	var obj_type: String = types[randi() % types.size()]
-	var start_pos  := _get_random_edge_position()
-
-	var obj: Node2D = SpaceObjectScene.instantiate()
+func _spawn_object():
+	active_objects = active_objects.filter(func(o): return is_instance_valid(o))
+	if active_objects.size() >= max_objects:
+		return
+	var unlocked = GameState.get_unlocked_types()
+	var obj = SPACE_OBJECT_SCENE.instantiate()
 	add_child(obj)
-	# setup() is called after add_child so @onready vars are resolved.
-	obj.setup(start_pos, obj_type, screen_size / 2.0)
+	obj.setup(_get_random_edge_position(), unlocked[randi() % unlocked.size()], black_hole.position)
+	active_objects.append(obj)
 
-# ── Callbacks ──────────────────────────────────────────────────────
-
-func _on_mass_changed() -> void:
+func _update_spawn_timer():
 	spawn_timer.wait_time = GameState.get_spawn_interval()
