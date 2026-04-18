@@ -1,5 +1,3 @@
-# background.gd
-# Attach to main scene to provide floating particles background
 extends CanvasLayer
 
 func _ready():

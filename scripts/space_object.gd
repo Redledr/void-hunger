@@ -44,7 +44,6 @@ func setup(start_pos, p_obj_type, bh_pos):
 
 	mass_value *= GameState.get_mass_multiplier()
 
-	# Determine shape based on mass rank
 	var sorted_types = ObjectData.DATA.keys()
 	sorted_types.sort_custom(Callable(self, "_compare_object_mass"))
 	var index = sorted_types.find(obj_type)
@@ -52,11 +51,11 @@ func setup(start_pos, p_obj_type, bh_pos):
 	if sides > 12:
 		sides = 12
 	
-	if index < 5:  # Low mass objects use circle
+	if index < 5:
 		var circle = CircleShape2D.new()
 		circle.radius = size / 2.0
 		hitbox.shape = circle
-	else:  # Higher mass use polygons with increasing sides
+	else:
 		var poly = ConvexPolygonShape2D.new()
 		poly.points = create_regular_polygon(sides, size / 2.0)
 		hitbox.shape = poly
@@ -69,7 +68,6 @@ func setup(start_pos, p_obj_type, bh_pos):
 	orbit_angle = (start_pos - black_hole_pos).angle()
 	orbit_speed = randf_range(0.3, 0.7) * (1.0 if randf() < 0.5 else -1.0)
 
-	# Set visual shapes to match hitbox
 	var visual_sides = sides if sides > 3 else 16  # Use 16 sides for circle visuals
 	var body_points = create_regular_polygon(visual_sides, size / 2.0)
 	var glow_points = create_regular_polygon(visual_sides, size * 1.25)
@@ -91,7 +89,6 @@ func setup(start_pos, p_obj_type, bh_pos):
 		glow.color = Color(color.r, color.g, color.b, 0.12)
 
 func apply_nudge(nudge_dir: Vector2, strength: float = 80.0):
-	# Reduce orbit radius — this is what moves it inward
 	orbit_radius -= strength
 	nudge_velocity += nudge_dir * strength * 0.5
 	is_being_nudged = true
@@ -99,10 +96,8 @@ func apply_nudge(nudge_dir: Vector2, strength: float = 80.0):
 func _process(delta):
 	orbit_angle += orbit_speed * delta
 
-	# Pull toward target orbit (THIS is the missing piece)
 	orbit_radius -= (orbit_radius - target_orbit_radius) * delta * 2.5
 
-	# Decay nudge
 	if is_being_nudged:
 		nudge_velocity *= nudge_decay
 		orbit_radius += nudge_velocity.length() * delta * -0.1
