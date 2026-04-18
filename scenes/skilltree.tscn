@@ -1,24 +1,70 @@
 [gd_scene format=3 uid="uid://bj6tugu27xi02"]
 
 [ext_resource type="Script" uid="uid://tor73uwvb0i6" path="res://scripts/skilltree.gd" id="1_n6rpy"]
-[ext_resource type="Script" uid="uid://d0bntiye6uqph" path="res://scripts/viewport.gd" id="2_lqb42"]
 
-[node name="SkillTree" type="Control" unique_id=894378538 groups=["skill_tree"]]
-layout_mode = 3
-anchors_preset = 0
-mouse_filter = 1
+[node name="SkillTree" type="CanvasLayer" unique_id=1443081458]
+process_mode = 3
+layer = 10
 script = ExtResource("1_n6rpy")
 
-[node name="Viewport" type="Control" parent="." unique_id=1879360731]
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-script = ExtResource("2_lqb42")
+[node name="Overlay" type="ColorRect" parent="." unique_id=988135049]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
 
-[node name="Lines" type="Control" parent="Viewport" unique_id=1127551138]
-anchors_preset = 0
+[node name="Panel" type="Panel" parent="Overlay" unique_id=976804486]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -300.0
+offset_right = 400.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="Nodes" type="Control" parent="Viewport" unique_id=613281675]
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="VBox" type="VBoxContainer" parent="Overlay/Panel" unique_id=593568815]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="HBoxContainer" parent="Overlay/Panel/VBox" unique_id=1514831993]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TitleLabel" type="Label" parent="Overlay/Panel/VBox/Header" unique_id=1192912497]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Skill Tree"
+horizontal_alignment = 1
+
+[node name="EnergyLabel" type="Label" parent="Overlay/Panel/VBox/Header" unique_id=1837610758]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Energy: 0.0"
+vertical_alignment = 1
+
+[node name="CloseButton" type="Button" parent="Overlay/Panel/VBox/Header" unique_id=1668938071]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+text = "x"
+
+[node name="Scroll" type="ScrollContainer" parent="Overlay/Panel/VBox" unique_id=596801863]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="NodeContainer" type="VBoxContainer" parent="Overlay/Panel/VBox/Scroll" unique_id=1936018430]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12

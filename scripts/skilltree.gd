@@ -1,161 +1,166 @@
-extends Control
+extends CanvasLayer
 
-@onready var tree = get_tree().get_first_node_in_group("skill_tree")
+@onready var overlay:        ColorRect       = $Overlay
+@onready var energy_label:   Label           = $Overlay/Panel/VBox/Header/EnergyLabel
+@onready var close_button:   Button          = $Overlay/Panel/VBox/Header/CloseButton
+@onready var node_container: VBoxContainer   = $Overlay/Panel/VBox/Scroll/NodeContainer
 
+# Holds references to each skill row so we can refresh them cheaply.
+var _rows: Dictionary = {}
 
-@onready var viewport = $Viewport
-var dragging := false
-var last_mouse_pos := Vector2.ZERO
-var view_start := Vector2.ZERO
+func _ready() -> void:
+	hide()   # starts hidden — shown on demand
 
-var zoom := 1.0
-const ZOOM_MIN := 0.5
-const ZOOM_MAX := 2.0
+	close_button.pressed.connect(hide_tree)
+	GameState.energy_changed.connect(_refresh_energy)
+	GameState.skill_purchased.connect(_on_skill_purchased)
 
-var node_container
-var line_container
-var branch_colors = {
-	"gravity": Color(1, 0.4, 0.4),
-	"mass": Color(1, 1, 0.4),
-	"chaos": Color(0.4, 0.6, 1),
-}
-const NODE_SIZE = Vector2(120, 40)
+	_build_tree()
+	_refresh_energy()
 
-var layout = {
-	1: Vector2(400, 600),
+# ── Public API ───────────────────────────────────────────────────────────────
 
-	2: Vector2(250, 520),
-	3: Vector2(400, 520),
-	4: Vector2(550, 520),
+func show_tree() -> void:
+	_refresh_all_rows()
+	show()
+	get_tree().paused = true
 
-	5: Vector2(400, 450),
-	6: Vector2(400, 380),
-	7: Vector2(400, 310),
+func hide_tree() -> void:
+	hide()
+	get_tree().paused = false
 
-	8: Vector2(200, 250),
-	9: Vector2(400, 250),
-	10: Vector2(600, 250),
+# ── Build ─────────────────────────────────────────────────────────────────────
+# Creates one row per skill node. Rows are grouped by depth so prerequisites
+# read top-to-bottom without needing a canvas layout.
 
-	11: Vector2(200, 180),
-	12: Vector2(400, 180),
-	13: Vector2(600, 180),
+func _build_tree() -> void:
+	# Group node IDs by their depth (longest prereq chain).
+	var depths := _compute_depths()
+	var by_depth: Dictionary = {}
+	for id in depths:
+		var d: int = depths[id]
+		if not by_depth.has(d):
+			by_depth[d] = []
+		by_depth[d].append(id)
 
-	14: Vector2(400, 110),
+	var sorted_depths := by_depth.keys()
+	sorted_depths.sort()
 
-	15: Vector2(200, 50),
-	16: Vector2(400, 50),
-	17: Vector2(600, 50),
+	for depth in sorted_depths:
+		# Separator label showing tier.
+		var sep := Label.new()
+		sep.text = "── Tier %d ──" % (depth + 1)
+		sep.add_theme_color_override("font_color", Color(0.5, 0.5, 0.6))
+		node_container.add_child(sep)
 
-	18: Vector2(200, -20),
-	19: Vector2(400, -20),
-	20: Vector2(600, -20),
-}
+		# Sort IDs within tier for stable ordering.
+		var ids: Array = by_depth[depth]
+		ids.sort()
+		for id in ids:
+			node_container.add_child(_make_row(id))
 
-var connections = [
-	[1,2],[1,3],[1,4],[1,5],
-	[5,6],[6,7],
+func _make_row(id: int) -> HBoxContainer:
+	var data := SkillData.get_skill_node(id)
 
-	[2,8],[8,11],
-	[3,9],[9,12],
-	[4,10],[10,13],
+	var row := HBoxContainer.new()
+	row.name = "Row_%d" % id
 
-	[11,14],[12,14],[13,14],
+	# Buy button.
+	var btn := Button.new()
+	btn.name         = "Btn"
+	btn.custom_minimum_size = Vector2(160, 36)
+	btn.pressed.connect(_on_buy_pressed.bind(id))
+	row.add_child(btn)
 
-	[11,15],[15,18],
-	[12,16],[16,19],
-	[13,17],[17,20],
-]
+	# Description label.
+	var lbl := Label.new()
+	lbl.name              = "Desc"
+	lbl.text              = "%s\n%s" % [data.get("desc", ""), _prereq_text(id)]
+	lbl.autowrap_mode     = TextServer.AUTOWRAP_WORD
+	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lbl.add_theme_font_size_override("font_size", 11)
+	lbl.add_theme_color_override("font_color", Color(0.75, 0.75, 0.8))
+	row.add_child(lbl)
 
-var buttons = {}
+	_rows[id] = row
+	_refresh_row(id)
+	return row
 
-func _process(_delta):
-	queue_redraw()
-		
-func _ready():
-	node_container = $Viewport/Nodes
-	line_container = $Viewport/Lines
+# ── Refresh ───────────────────────────────────────────────────────────────────
 
-	_create_nodes()
-	queue_redraw()
-	
-func _create_nodes():
-	for id in layout.keys():
-		var btn = Button.new()
-		btn.name = "Button_%d" % id
-		btn.text = str(id)
-		btn.size = NODE_SIZE
-		btn.position = layout[id] - NODE_SIZE / 2
+func _refresh_energy() -> void:
+	energy_label.text = "Energy: %s" % snapped(GameState.energy, 0.1)
+	_refresh_all_rows()
 
-		btn.pressed.connect(_on_node_pressed.bind(id))
+func _refresh_all_rows() -> void:
+	for id in _rows:
+		_refresh_row(id)
 
-		node_container.add_child(btn)
-		buttons[id] = btn
-		
-func _on_node_pressed(id):
-	print("Clicked upgrade:", id)
-	
-func set_node_state(id, state):
-	var btn = buttons[id]
+func _refresh_row(id: int) -> void:
+	if not _rows.has(id):
+		return
 
-	match state:
-		"locked":
-			btn.modulate = Color(0.3, 0.3, 0.3)
-			btn.disabled = true
+	var row  := _rows[id] as HBoxContainer
+	var btn  := row.get_node("Btn")  as Button
+	var data := SkillData.get_skill_node(id)
+	var cost := float(data.get("cost", 0.0))
 
-		"available":
-			btn.modulate = Color(1, 1, 1)
-			btn.disabled = false
+	if GameState.unlocked_skills.has(id):
+		btn.text     = "✓ %s" % data.get("label", str(id))
+		btn.disabled = true
+		btn.modulate = Color(0.3, 0.9, 0.4)
+	elif GameState.can_buy_skill(id):
+		btn.text     = "%s\n[%s E]" % [data.get("label", str(id)), snapped(cost, 0.1)]
+		btn.disabled = false
+		btn.modulate = Color(1.0, 1.0, 1.0)
+	else:
+		btn.text     = "🔒 %s\n[%s E]" % [data.get("label", str(id)), snapped(cost, 0.1)]
+		btn.disabled = true
+		btn.modulate = Color(0.4, 0.4, 0.45)
 
-		"unlocked":
-			btn.modulate = Color(0.2, 1, 0.4)
-			btn.disabled = false
-var unlocked = {}
+func _on_skill_purchased(id: int) -> void:
+	_refresh_row(id)
+	# Refresh siblings — purchasing may unlock their prereqs.
+	for other_id in _rows:
+		if id in SkillData.get_skill_node(other_id).get("prereqs", []):
+			_refresh_row(other_id)
 
-func can_unlock(id):
-	#var data = upgrades[id]
-	#for req in data.prereq:
-		#if not unlocked.has(req):
-			#return false
-	return true
+# ── Input ─────────────────────────────────────────────────────────────────────
 
-func refresh_tree():
-	for id in buttons.keys():
-		if unlocked.has(id):
-			set_node_state(id, "unlocked")
-		elif can_unlock(id):
-			set_node_state(id, "available")
-		else:
-			set_node_state(id, "locked")
+func _on_buy_pressed(id: int) -> void:
+	GameState.buy_skill(id)
 
-func _unhandled_input(event):
-	# Start drag
-	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			dragging = event.pressed
-			last_mouse_pos = event.position
-			view_start = viewport.position
+func _unhandled_input(event: InputEvent) -> void:
+	# Let Escape close the tree.
+	if visible and event.is_action_pressed("ui_cancel"):
+		hide_tree()
 
-	# Dragging motion
-	elif event is InputEventMouseMotion and dragging:
-		var delta = event.position - last_mouse_pos
-		viewport.position += delta
-		last_mouse_pos = event.position
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
-func _input(event):
-	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			_set_zoom(1.1)
-		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			_set_zoom(0.9)
+func _prereq_text(id: int) -> String:
+	var prereqs: Array = SkillData.get_skill_node(id).get("prereqs", [])
+	if prereqs.is_empty():
+		return ""
+	var names := prereqs.map(func(p): return SkillData.get_skill_node(p).get("label", str(p)))
+	return "Requires: %s" % ", ".join(names)
 
-func _set_zoom(factor):
-	var old_zoom = zoom
-	zoom = clamp(zoom * factor, ZOOM_MIN, ZOOM_MAX)
+# Computes the depth of each node (longest path from root).
+# Depth 0 = no prerequisites.
+func _compute_depths() -> Dictionary:
+	var depths: Dictionary = {}
+	for id in SkillData.get_all_ids():
+		_depth_of(id, depths)
+	return depths
 
-	var mouse = get_global_mouse_position()
-
-	var before = (mouse - viewport.position) / old_zoom
-	var after = (mouse - viewport.position) / zoom
-
-	viewport.position += (after - before)
-	viewport.scale = Vector2.ONE * zoom
+func _depth_of(id: int, cache: Dictionary) -> int:
+	if cache.has(id):
+		return cache[id]
+	var prereqs: Array = SkillData.get_skill_node(id).get("prereqs", [])
+	if prereqs.is_empty():
+		cache[id] = 0
+		return 0
+	var max_parent := 0
+	for p in prereqs:
+		max_parent = maxi(max_parent, _depth_of(p, cache))
+	cache[id] = max_parent + 1
+	return cache[id]

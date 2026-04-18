@@ -11,14 +11,15 @@ offset_top = 10.0
 offset_right = 50.0
 offset_bottom = 69.0
 
-[node name="MassLabel" type="Label" parent="Panel" unique_id=1059238478]
+[node name="VBox" type="VBoxContainer" parent="Panel" unique_id=1477313128]
 layout_mode = 2
 
-[node name="SpawnButton" type="Button" parent="Panel" unique_id=184663870]
+[node name="MassLabel" type="Label" parent="Panel/VBox" unique_id=1059238478]
 layout_mode = 2
 
-[node name="PullButton" type="Button" parent="Panel" unique_id=225981636]
+[node name="EnergyLabel" type="Label" parent="Panel/VBox" unique_id=186355516]
 layout_mode = 2
 
-[node name="MultiButton" type="Button" parent="Panel" unique_id=1453614472]
+[node name="SkillTreeButton" type="Button" parent="Panel/VBox" unique_id=1985953821]
 layout_mode = 2
+text = "Skill Tree"

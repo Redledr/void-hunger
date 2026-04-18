@@ -19,6 +19,7 @@ config/features=PackedStringArray("4.6", "GL Compatibility")
 
 GameState="*uid://blk8c2gp5gndn"
 ObjectData="*uid://d13e7r77e60gf"
+SkillData="*uid://cmmnmqux6fla4"
 
 [display]
 
@@ -26,6 +27,7 @@ window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/size/borderless=true
 window/stretch/mode="canvas_items"
+window/stretch/aspect="keep_width"
 
 [layer_names]
 

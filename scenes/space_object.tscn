@@ -8,10 +8,10 @@ size = Vector2(22.22229, 22.222229)
 [node name="SpaceObject" type="Node2D" unique_id=455770238]
 script = ExtResource("1_lgaer")
 
-[node name="GlowRect" type="Polygon2D" parent="." unique_id=225060525]
+[node name="Glow" type="Polygon2D" parent="." unique_id=225060525]
 metadata/_edit_use_anchors_ = true
 
-[node name="BodyRect" type="Polygon2D" parent="." unique_id=1301968182]
+[node name="Body" type="Polygon2D" parent="." unique_id=1301968182]
 metadata/_edit_use_anchors_ = true
 
 [node name="HitArea" type="Area2D" parent="." unique_id=1101903322]

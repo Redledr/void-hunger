@@ -4,6 +4,8 @@
 [ext_resource type="PackedScene" uid="uid://daw55i4tb67ke" path="res://scenes/black_hole.tscn" id="2_sugp2"]
 [ext_resource type="PackedScene" uid="uid://ji8f8wd5hsuv" path="res://scenes/ui.tscn" id="3_jyhfs"]
 [ext_resource type="Script" uid="uid://c1ifc3v4sq26d" path="res://scripts/background.gd" id="4_rarhs"]
+[ext_resource type="PackedScene" uid="uid://bj6tugu27xi02" path="res://scenes/skilltree.tscn" id="5_tbgi4"]
+[ext_resource type="Script" uid="uid://dgl3fyfptyuln" path="res://scripts/particle_manager.gd" id="6_tefeu"]
 
 [node name="Node2D" type="Node2D" unique_id=688130031]
 script = ExtResource("1_o5qli")
@@ -43,3 +45,8 @@ grow_vertical = 2
 [node name="Background" type="CanvasLayer" parent="Control" unique_id=1071963811]
 layer = -2
 script = ExtResource("4_rarhs")
+
+[node name="SkillTree" parent="." unique_id=1443081458 instance=ExtResource("5_tbgi4")]
+
+[node name="ParticleManager" type="Node2D" parent="." unique_id=197367952]
+script = ExtResource("6_tefeu")
