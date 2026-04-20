@@ -63,12 +63,12 @@ func _build_nebula() -> void:
 		p.scale_amount_max     = 380.0
 		p.color                = palettes[i % palettes.size()]
 
-		var curve := Curve.new()
-		curve.add_point(Vector2(0.0, 0.0))
-		curve.add_point(Vector2(0.3, 1.0))
-		curve.add_point(Vector2(0.7, 1.0))
-		curve.add_point(Vector2(1.0, 0.0))
-		p.alpha_curve = curve
+		var curve := Gradient.new()
+		curve.add_point(0.0, Color(1, 1, 1, 0.0))
+		curve.add_point(0.3, Color(1, 1, 1, 1.0))
+		curve.add_point(0.7, Color(1, 1, 1, 1.0))
+		curve.add_point(1.0, Color(1, 1, 1, 0.0))
+		p.color_ramp = curve
 
 		add_child(p)
 		_nebula_nodes.append(p)
@@ -156,10 +156,11 @@ func _build_stars_cpu() -> void:
 		p.scale_amount_max     = cfg["size_max"]
 		p.color                = Color(1.0, 1.0, 1.0, cfg["alpha"])
 
-		var curve := Curve.new()
-		curve.add_point(Vector2(0.0, 0.6))
-		curve.add_point(Vector2(0.5, 1.0))
-		curve.add_point(Vector2(1.0, 0.6))
-		p.alpha_curve = curve
+		var curve := Gradient.new()
+		curve.add_point(0.0, Color(1, 1, 1, 0.0))
+		curve.add_point(0.3, Color(1, 1, 1, 1.0))
+		curve.add_point(0.7, Color(1, 1, 1, 1.0))
+		curve.add_point(1.0, Color(1, 1, 1, 0.0))
+		p.color_ramp = curve
 
 		add_child(p)
