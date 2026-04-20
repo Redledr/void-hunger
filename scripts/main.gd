@@ -1,22 +1,18 @@
 # main.gd
-# Root script for the main scene (Node2D).
-#
-# Responsibilities:
-#   - Spawn and track space objects
-#   - Handle nudge input (gated behind mechanic_nudge skill)
-#   - Draw nudge radius indicator
-#   - Expose ParticleManager to the rest of the scene via a static reference
 extends Node2D
 
 const SPACE_OBJECT_SCENE := preload("res://scenes/space_object.tscn")
-
-# Static reference so space_object.gd can call GameState.particles.burst()
-# without needing a node path.
 
 @onready var black_hole:        Node2D = $BlackHole
 @onready var spawn_timer:       Timer  = $SpawnTimer
 @onready var debug_label:       Label  = $DebugLabel
 @onready var particle_manager:  Node2D = $ParticleManager
+
+var _absorb_count:        int   = 0
+var _absorb_timer:        float = 0.0
+var _absorbs_per_min:     float = 0.0
+var _avg_mass_per_absorb: float = 1.0
+var _mass_at_last_sample: float = 0.0
 
 const MAX_OBJECTS:    int   = 40
 const NUDGE_RADIUS:   float = 80.0
@@ -26,12 +22,13 @@ var screen_size:    Vector2 = Vector2.ZERO
 var active_objects: Array   = []
 var mouse_pos:      Vector2 = Vector2.ZERO
 
-# Whether the nudge ring should be visible at all.
 var _nudge_unlocked: bool = false
 
 func _ready() -> void:
 	GameState.particles = particle_manager
 	screen_size = get_viewport().get_visible_rect().size
+
+	GameState.load_game()
 
 	spawn_timer.wait_time = GameState.get_spawn_interval()
 	spawn_timer.timeout.connect(_spawn_object)
@@ -39,8 +36,8 @@ func _ready() -> void:
 
 	GameState.mass_changed.connect(_update_spawn_timer)
 	GameState.skill_purchased.connect(_on_skill_purchased)
+	GameState.object_absorbed.connect(register_absorption)
 
-	# Reflect skill state on load (e.g. after save/load later).
 	_nudge_unlocked = GameState.has_skill("mechanic_nudge")
 
 # ── Input ────────────────────────────────────────────────────────────────────
@@ -66,8 +63,8 @@ func _draw() -> void:
 
 # ── Process ──────────────────────────────────────────────────────────────────
 
-func _process(_delta: float) -> void:
-	_update_debug()
+func _process(delta: float) -> void:
+	_update_debug(delta)
 
 # ── Nudge ────────────────────────────────────────────────────────────────────
 
@@ -112,15 +109,57 @@ func _on_skill_purchased(id: int) -> void:
 		_nudge_unlocked = true
 		queue_redraw()
 
+func register_absorption() -> void:
+	_absorb_count += 1
+
 # ── Debug ─────────────────────────────────────────────────────────────────────
 
-func _update_debug() -> void:
+func _update_debug(delta: float) -> void:
+	_absorb_timer += delta
+
+	# Rolling window: recalculate rates every 10 seconds then reset counters.
+	if _absorb_timer >= 10.0:
+		_absorbs_per_min = (_absorb_count / _absorb_timer) * 60.0
+		if _absorb_count > 0:
+			var mass_gained      := GameState.mass - _mass_at_last_sample
+			_avg_mass_per_absorb  = mass_gained / float(_absorb_count)
+		_mass_at_last_sample = GameState.mass
+		_absorb_count        = 0
+		_absorb_timer        = 0.0
+
+	var passive_rate := 4.0 + GameState.mass * 0.012
+
+	# Elapsed time.
+	var e           := GameState.elapsed_time
+	var elapsed_str := "%02d:%02d" % [int(e / 60), int(e) % 60]
+
+	# ETA to planet tier (mass 500) as a mid-game proxy.
+	var eta_str := "??:??"
+	if _absorbs_per_min > 0.0:
+		var mass_per_min := _absorbs_per_min * _avg_mass_per_absorb
+		var mass_needed  := maxf(0.0, 500.0 - GameState.mass)
+		if mass_per_min > 0.0:
+			var mins    := mass_needed / mass_per_min
+			eta_str      = "%02d:%02d" % [int(mins), int(mins * 60.0) % 60]
+
+	# Active object counts by type.
 	var counts: Dictionary = {}
 	for obj in active_objects:
 		if is_instance_valid(obj):
 			counts[obj.obj_type] = counts.get(obj.obj_type, 0) + 1
 
-	var lines := ["Active Objects:"]
+	var lines: Array = [
+		"── debug ──",
+		"time:    %s"      % elapsed_str,
+		"eta mid: %s"      % eta_str,
+		"mass:    %.1f"    % GameState.mass,
+		"energy:  %.1f"    % GameState.energy,
+		"pull/s:  %.2f"    % passive_rate,
+		"abs/min: %.1f"    % _absorbs_per_min,
+		"objects: %d / %d" % [active_objects.filter(func(o): return is_instance_valid(o)).size(), MAX_OBJECTS],
+		"──────────",
+	]
 	for type in counts:
-		lines.append("%s: %d" % [type, counts[type]])
+		lines.append("  %s: %d" % [type, counts[type]])
+
 	debug_label.text = "\n".join(lines)

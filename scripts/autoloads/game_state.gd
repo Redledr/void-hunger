@@ -5,21 +5,25 @@ extends Node
 signal mass_changed
 signal energy_changed
 signal skill_purchased(id: int)
+signal object_absorbed
 
 var mass:     float = 0.0
 var energy:   float = 0.0
-
-# Set by main.gd on _ready. Any script can call GameState.particles.burst().
+var elapsed_time: float = 0.0
 var particles: Node = null
-
-# Tracks which skill IDs have been purchased.
 var unlocked_skills: Dictionary = {}
+
+const SAVE_PATH := "user://savegame.cfg"
+
+func _process(delta: float) -> void:
+	elapsed_time += delta
 
 # ── Mass ────────────────────────────────────────────────────────────────────
 
 func add_mass(amount: float) -> void:
 	mass += amount
 	emit_signal("mass_changed")
+	emit_signal("object_absorbed")
 
 # ── Energy ──────────────────────────────────────────────────────────────────
 
@@ -36,16 +40,12 @@ func has_skill(effect: String) -> bool:
 			return true
 	return false
 
-# Returns the value of the highest-tier purchased skill with the given effect,
-# or default_val if no such skill has been purchased.
 func get_skill_value(effect: String, default_val: float) -> float:
 	var best := default_val
 	for id in unlocked_skills:
 		var node := SkillData.get_skill_node(id)
 		if node.get("effect", "") == effect:
 			var v: float = float(node.get("value", default_val))
-			# For reductions, higher value = more reduced, so take max.
-			# For rates/lengths, higher value = stronger, so take max.
 			best = maxf(best, v)
 	return best
 
@@ -70,6 +70,7 @@ func buy_skill(id: int) -> bool:
 	unlocked_skills[id] = true
 	emit_signal("energy_changed")
 	emit_signal("skill_purchased", id)
+	save_game()
 	return true
 
 # ── Spawn helpers ────────────────────────────────────────────────────────────
@@ -82,9 +83,6 @@ func get_mass_multiplier() -> float:
 	return 1.0 + get_skill_value("mass_multi", 0.0)
 
 # ── Object unlock ────────────────────────────────────────────────────────────
-#
-# Types become spawnable when the player's mass is in a sensible window.
-# "unlock_tier" skills extend that window upward over time.
 
 func get_unlocked_types() -> Array:
 	var sorted := ObjectData.get_sorted_types()
@@ -92,8 +90,6 @@ func get_unlocked_types() -> Array:
 		return []
 
 	var tier_bonus: float = get_skill_value("unlock_tier", 0.0)
-	# Window: spawn objects between 20% and 500% of current mass.
-	# Tier unlock skill widens the upper bound gradually.
 	var lower_bound: float = mass * 0.2
 	var upper_bound: float = mass * (5.0 + tier_bonus * 2.0)
 
@@ -103,12 +99,46 @@ func get_unlocked_types() -> Array:
 		if obj_mass >= lower_bound and obj_mass <= upper_bound:
 			result.append(type_name)
 
-	# Only fall back to lightest type if mass is so low nothing fits the window.
-	# Once mass grows enough to have valid entries, quarks never appear again.
 	if result.is_empty():
 		result.append(sorted[0])
 
 	return result
 
-func _compare_object_mass(a: String, b: String) -> bool:
-	return ObjectData.DATA[a]["mass"] < ObjectData.DATA[b]["mass"]
+# ── Save / Load ──────────────────────────────────────────────────────────────
+
+func save_game() -> void:
+	var cfg := ConfigFile.new()
+	cfg.set_value("game", "mass",            mass)
+	cfg.set_value("game", "energy",          energy)
+	# Store skill IDs as an array of ints — ConfigFile handles this natively.
+	cfg.set_value("game", "unlocked_skills", unlocked_skills.keys())
+	var err := cfg.save(SAVE_PATH)
+	if err != OK:
+		push_error("GameState: failed to save (%d)" % err)
+
+func load_game() -> void:
+	var cfg := ConfigFile.new()
+	var err := cfg.load(SAVE_PATH)
+	if err != OK:
+		# No save file yet — start fresh, that's fine.
+		return
+
+	mass   = float(cfg.get_value("game", "mass",   0.0))
+	energy = float(cfg.get_value("game", "energy", 0.0))
+
+	unlocked_skills.clear()
+	var ids: Array = cfg.get_value("game", "unlocked_skills", [])
+	for id in ids:
+		unlocked_skills[int(id)] = true
+
+	emit_signal("mass_changed")
+	emit_signal("energy_changed")
+
+func delete_save() -> void:
+	if FileAccess.file_exists(SAVE_PATH):
+		DirAccess.remove_absolute(SAVE_PATH)
+	mass   = 0.0
+	energy = 0.0
+	unlocked_skills.clear()
+	emit_signal("mass_changed")
+	emit_signal("energy_changed")

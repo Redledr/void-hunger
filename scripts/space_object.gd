@@ -16,11 +16,15 @@ var target_orbit_radius: float   = 0.0
 const BASE_LERP_SPEED:  float = 2.5
 const NUDGE_LERP_BOOST: float = 5.0
 
+# Passive pull: how many units/sec the target radius shrinks on its own.
+# Scales gently with black hole mass so early game is slow, late game faster.
+const PASSIVE_PULL_BASE:  float = 4.0   # units/sec at mass 0
+const PASSIVE_PULL_SCALE: float = 0.012 # additional units/sec per unit of mass
+
 var _nudge_lerp_speed: float = BASE_LERP_SPEED
 var _spiraling:        bool  = false
 
 # ── Trail (circular buffer) ─────────────────────────────────────────────────
-# Length is read from GameState so the skill tree can extend it.
 var _max_trail:  int = 20
 var _trail:      PackedVector2Array = PackedVector2Array()
 var _trail_head: int = 0
@@ -65,7 +69,6 @@ func setup(start_pos: Vector2, p_obj_type: String, bh_pos: Vector2) -> void:
 	glow.polygon = _make_polygon(visual_sides, size * 1.25)
 	glow.color   = Color(color.r, color.g, color.b, 0.12)
 
-	# Trail length driven by skill tree.
 	_max_trail = int(GameState.get_skill_value("trail_length", 20.0))
 	_trail.resize(_max_trail)
 
@@ -74,13 +77,12 @@ func setup(start_pos: Vector2, p_obj_type: String, bh_pos: Vector2) -> void:
 func apply_nudge(_strength: float = 0.0) -> void:
 	if _spiraling:
 		return
-	# Check nudge resistance — reduced by skill tree.
 	var data     := ObjectData.get_data(obj_type)
 	var base_resist: float = data.get("nudge_resist", 0.0)
 	var reduction:   float = GameState.get_skill_value("nudge_resist_reduction", 0.0)
 	var final_resist := maxf(0.0, base_resist - reduction)
 	if randf() < final_resist:
-		return  # Resisted — TODO: flash object to give visual feedback
+		return
 
 	_spiraling        = true
 	_nudge_lerp_speed = BASE_LERP_SPEED + NUDGE_LERP_BOOST
@@ -90,6 +92,12 @@ func apply_nudge(_strength: float = 0.0) -> void:
 func _process(delta: float) -> void:
 	orbit_angle += orbit_speed * delta
 
+	# Passive pull: target slowly drifts inward regardless of nudge.
+	# Rate scales with black hole mass so it stays gentle early, meaningful late.
+	var passive_rate := PASSIVE_PULL_BASE + GameState.mass * PASSIVE_PULL_SCALE
+	target_orbit_radius = maxf(0.0, target_orbit_radius - passive_rate * delta)
+
+	# Nudge/spiral: accelerated inward collapse when triggered.
 	if _spiraling:
 		var rate := GameState.get_skill_value("spiral_rate", 60.0)
 		target_orbit_radius = maxf(0.0, target_orbit_radius - rate * delta)
@@ -108,7 +116,6 @@ func _draw() -> void:
 	if _trail_count < 2:
 		return
 	for i in range(_trail_count - 1):
-		# Walk backwards from current position toward the tail
 		var idx_a := (_trail_head + _trail_count - 1 - i)     % _max_trail
 		var idx_b := (_trail_head + _trail_count - 2 - i)     % _max_trail
 		var alpha := 1.0 - float(i) / float(_trail_count)

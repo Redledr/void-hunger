@@ -27,7 +27,7 @@ func _load_csv() -> void:
 		push_error("ObjectData: could not open %s" % PATH)
 		return
 
-	var headers := file.get_csv_line()
+	file.get_csv_line()  # skip header row
 
 	while not file.eof_reached():
 		var c: PackedStringArray = file.get_csv_line()
