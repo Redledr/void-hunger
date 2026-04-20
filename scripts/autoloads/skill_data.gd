@@ -1,22 +1,15 @@
 # skill_data.gd
 # Autoload singleton — Project > Autoloads as "SkillData"
 #
-# Defines every skill tree node. Nothing here mutates — this is read-only
-# reference data. GameState owns what's been purchased.
+# Skill structure (prereqs, effects) lives here as source of truth.
+# Cost and value are patched at startup from res://data/skill_data.csv,
+# auto-downloaded from Google Sheets.
 #
-# Effect types and what consumes them:
-#   "mechanic_nudge"  — main.gd gates nudge input behind has_skill()
-#   "spiral_rate"     — space_object.gd reads get_skill_value()
-#   "trail_length"    — space_object.gd reads get_skill_value()
-#   "nudge_resist"    — space_object.gd reads get_skill_value()
-#   "unlock_tier"     — game_state.get_unlocked_types() cross-references
-#   "spawn_rate"      — game_state.get_spawn_interval() reads get_skill_value()
-#   "energy_gain"     — space_object._absorb() reads get_skill_value()
-#   "pull_strength"   — reserved for black hole pull logic
+# To change costs/values: edit the Google Sheet, hit Play.
+# To change structure (prereqs, effects): edit NODES below.
 extends Node
 
-const NODES: Dictionary = {
-	# ── Root ────────────────────────────────────────────────────────────────
+var NODES: Dictionary = {
 	1: {
 		"label":   "Nudge",
 		"desc":    "Unlock the ability to nudge objects into a death spiral.",
@@ -25,15 +18,13 @@ const NODES: Dictionary = {
 		"effect":  "mechanic_nudge",
 		"value":   1,
 	},
-
-	# ── Branch A: Spiral ────────────────────────────────────────────────────
 	2: {
 		"label":   "Faster Spiral",
 		"desc":    "Nudged objects spiral inward 50% faster.",
 		"cost":    20.0,
 		"prereqs": [1],
 		"effect":  "spiral_rate",
-		"value":   90.0,        # replaces default SPIRAL_RATE of 60
+		"value":   90.0,
 	},
 	5: {
 		"label":   "Death Spiral",
@@ -43,15 +34,13 @@ const NODES: Dictionary = {
 		"effect":  "spiral_rate",
 		"value":   140.0,
 	},
-
-	# ── Branch B: Trail ─────────────────────────────────────────────────────
 	3: {
 		"label":   "Long Trail",
 		"desc":    "Object trails grow twice as long.",
 		"cost":    15.0,
 		"prereqs": [1],
 		"effect":  "trail_length",
-		"value":   40,          # replaces MAX_TRAIL of 20
+		"value":   40,
 	},
 	6: {
 		"label":   "Comet Trail",
@@ -61,8 +50,6 @@ const NODES: Dictionary = {
 		"effect":  "trail_length",
 		"value":   70,
 	},
-
-	# ── Branch C: Resistance ────────────────────────────────────────────────
 	4: {
 		"label":   "Weakened Resist",
 		"desc":    "All objects are 30% less likely to resist nudges.",
@@ -79,25 +66,21 @@ const NODES: Dictionary = {
 		"effect":  "nudge_resist_reduction",
 		"value":   0.8,
 	},
-
-	# ── Convergence: Tier Unlock ─────────────────────────────────────────────
 	8: {
 		"label":   "Tier Unlock",
 		"desc":    "Unlocks the next class of objects to spawn.",
 		"cost":    80.0,
-		"prereqs": [5, 6, 7],   # requires all three branch ends
+		"prereqs": [5, 6, 7],
 		"effect":  "unlock_tier",
-		"value":   1,           # GameState increments an unlock tier counter
+		"value":   1,
 	},
-
-	# ── Branch D: Utility ───────────────────────────────────────────────────
 	9: {
 		"label":   "Spawn Surge",
 		"desc":    "Objects spawn 25% faster.",
 		"cost":    40.0,
 		"prereqs": [8],
 		"effect":  "spawn_rate",
-		"value":   0.75,        # multiplier on spawn interval
+		"value":   0.75,
 	},
 	10: {
 		"label":   "Energy Surge",
@@ -105,7 +88,7 @@ const NODES: Dictionary = {
 		"cost":    40.0,
 		"prereqs": [8],
 		"effect":  "energy_gain",
-		"value":   1.5,         # multiplier on energy awarded
+		"value":   1.5,
 	},
 	11: {
 		"label":   "Pull Strength",
@@ -113,10 +96,8 @@ const NODES: Dictionary = {
 		"cost":    40.0,
 		"prereqs": [8],
 		"effect":  "pull_strength",
-		"value":   1.4,         # multiplier on pull zone size
+		"value":   1.4,
 	},
-
-	# ── Endgame ─────────────────────────────────────────────────────────────
 	12: {
 		"label":   "Singularity",
 		"desc":    "All systems at maximum. The end begins.",
@@ -126,6 +107,44 @@ const NODES: Dictionary = {
 		"value":   1,
 	},
 }
+
+func _ready() -> void:
+	_apply_csv()
+
+func _apply_csv() -> void:
+	const PATH := "res://data/skill_data.csv"
+
+	if not FileAccess.file_exists(PATH):
+		push_warning("SkillData: %s not found, using hardcoded values." % PATH)
+		return
+
+	var file := FileAccess.open(PATH, FileAccess.READ)
+	if not file:
+		push_error("SkillData: could not open %s" % PATH)
+		return
+
+	file.get_line()  # skip header
+
+	var patched := 0
+	while not file.eof_reached():
+		var line := file.get_line().strip_edges()
+		if line.is_empty():
+			continue
+		var c := line.split(",")
+		if c.size() < 4:
+			continue
+		var id    := int(c[0])
+		var cost  := float(c[2])
+		var value := float(c[3])
+		if NODES.has(id):
+			NODES[id]["cost"]  = cost
+			NODES[id]["value"] = value
+			patched += 1
+		else:
+			push_warning("SkillData: CSV has id %d but no matching NODES entry" % id)
+
+	file.close()
+	print("SkillData: patched %d skills from CSV" % patched)
 
 func get_skill_node(id: int) -> Dictionary:
 	return NODES.get(id, {})
