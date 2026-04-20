@@ -29,38 +29,37 @@ func _gpu_supported() -> bool:
 # ── Nebula ────────────────────────────────────────────────────────────────────
 func _build_nebula() -> void:
 	var screen := Vector2(1920.0, 1080.0)
-
 	var palettes := [
-		Color(0.18, 0.05, 0.38, 0.06),
-		Color(0.05, 0.08, 0.35, 0.05),
-		Color(0.28, 0.05, 0.18, 0.05),
-		Color(0.05, 0.15, 0.28, 0.04),
+		Color(0.18, 0.05, 0.38, 0.04),
+		Color(0.05, 0.08, 0.35, 0.03),
+		Color(0.28, 0.05, 0.18, 0.03),
+		Color(0.05, 0.15, 0.28, 0.03),
 	]
 
 	for i in range(NEBULA_LAYERS):
 		var p           := CPUParticles2D.new()
 		p.z_index        = -5
-		p.amount         = 6
-		p.lifetime       = 18.0
-		p.preprocess     = 9.0
+		p.amount         = 40          # more particles, smaller
+		p.lifetime       = 30.0
+		p.preprocess     = 15.0
 		p.one_shot       = false
 		p.explosiveness  = 0.0
 		p.randomness     = 1.0
 
-		p.emission_shape        = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
-		p.emission_rect_extents = screen * 0.6
+		p.emission_shape         = CPUParticles2D.EMISSION_SHAPE_SPHERE
+		p.emission_sphere_radius = 500.0   # spread across a large area
 		p.position = screen * 0.5 + Vector2(
-			randf_range(-200.0, 200.0),
-			randf_range(-100.0, 100.0)
+			randf_range(-300.0, 300.0),
+			randf_range(-150.0, 150.0)
 		)
 
-		p.direction            = Vector2(1.0, 0.2).normalized()
-		p.spread               = 180.0
+		p.direction            = Vector2(1.0, 0.0)
+		p.spread               = 20.0      # tight drift, not omnidirectional
 		p.gravity              = Vector2.ZERO
-		p.initial_velocity_min = DRIFT_SPEED * 0.4
-		p.initial_velocity_max = DRIFT_SPEED * 1.2
-		p.scale_amount_min     = 180.0
-		p.scale_amount_max     = 380.0
+		p.initial_velocity_min = DRIFT_SPEED * 0.2
+		p.initial_velocity_max = DRIFT_SPEED * 0.6
+		p.scale_amount_min     = 60.0      # was 180–380 — much smaller
+		p.scale_amount_max     = 120.0
 		p.color                = palettes[i % palettes.size()]
 
 		var curve := Gradient.new()

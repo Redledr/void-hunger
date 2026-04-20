@@ -1,4 +1,3 @@
-# main.gd
 extends Node2D
 
 const SPACE_OBJECT_SCENE := preload("res://scenes/space_object.tscn")
@@ -13,10 +12,6 @@ var _absorb_timer:        float = 0.0
 var _absorbs_per_min:     float = 0.0
 var _avg_mass_per_absorb: float = 1.0
 var _mass_at_last_sample: float = 0.0
-
-const MAX_OBJECTS:    int   = 40
-const NUDGE_RADIUS:   float = 80.0
-const NUDGE_STRENGTH: float = 120.0
 
 var screen_size:    Vector2 = Vector2.ZERO
 var active_objects: Array   = []
@@ -59,7 +54,7 @@ func _input(event: InputEvent) -> void:
 func _draw() -> void:
 	if not _nudge_unlocked:
 		return
-	draw_arc(mouse_pos, NUDGE_RADIUS, 0.0, TAU, 64, Color(1.0, 1.0, 1.0, 0.2), 1.0)
+	draw_arc(mouse_pos, GameConfig.nudge_radius, 0.0, TAU, 64, Color(1.0, 1.0, 1.0, 0.2), 1.0)
 
 # ── Process ──────────────────────────────────────────────────────────────────
 
@@ -72,14 +67,14 @@ func _try_nudge(click_pos: Vector2) -> void:
 	for obj in active_objects:
 		if not is_instance_valid(obj):
 			continue
-		if obj.position.distance_to(click_pos) <= NUDGE_RADIUS:
-			obj.apply_nudge(NUDGE_STRENGTH)
+		if obj.position.distance_to(click_pos) <= GameConfig.nudge_radius:
+			obj.apply_nudge(GameConfig.nudge_strength)
 
 # ── Spawn ────────────────────────────────────────────────────────────────────
 
 func _spawn_object() -> void:
 	active_objects = active_objects.filter(func(o): return is_instance_valid(o))
-	if active_objects.size() >= MAX_OBJECTS:
+	if active_objects.size() >= GameConfig.max_objects:
 		return
 
 	var unlocked := GameState.get_unlocked_types()
@@ -95,7 +90,7 @@ func _random_edge_position() -> Vector2:
 	match randi() % 4:
 		0: return Vector2(randf() * screen_size.x, 0.0)
 		1: return Vector2(randf() * screen_size.x, screen_size.y)
-		2: return Vector2(0.0,          randf() * screen_size.y)
+		2: return Vector2(0.0,           randf() * screen_size.y)
 		_: return Vector2(screen_size.x, randf() * screen_size.y)
 
 # ── Signals ──────────────────────────────────────────────────────────────────
@@ -117,7 +112,6 @@ func register_absorption() -> void:
 func _update_debug(delta: float) -> void:
 	_absorb_timer += delta
 
-	# Rolling window: recalculate rates every 10 seconds then reset counters.
 	if _absorb_timer >= 10.0:
 		_absorbs_per_min = (_absorb_count / _absorb_timer) * 60.0
 		if _absorb_count > 0:
@@ -127,13 +121,11 @@ func _update_debug(delta: float) -> void:
 		_absorb_count        = 0
 		_absorb_timer        = 0.0
 
-	var passive_rate := 4.0 + GameState.mass * 0.012
+	var passive_rate := GameConfig.passive_pull_base + GameState.mass * GameConfig.passive_pull_scale
 
-	# Elapsed time.
 	var e           := GameState.elapsed_time
 	var elapsed_str := "%02d:%02d" % [int(e / 60), int(e) % 60]
 
-	# ETA to planet tier (mass 500) as a mid-game proxy.
 	var eta_str := "??:??"
 	if _absorbs_per_min > 0.0:
 		var mass_per_min := _absorbs_per_min * _avg_mass_per_absorb
@@ -142,7 +134,6 @@ func _update_debug(delta: float) -> void:
 			var mins    := mass_needed / mass_per_min
 			eta_str      = "%02d:%02d" % [int(mins), int(mins * 60.0) % 60]
 
-	# Active object counts by type.
 	var counts: Dictionary = {}
 	for obj in active_objects:
 		if is_instance_valid(obj):
@@ -156,7 +147,7 @@ func _update_debug(delta: float) -> void:
 		"energy:  %.1f"    % GameState.energy,
 		"pull/s:  %.2f"    % passive_rate,
 		"abs/min: %.1f"    % _absorbs_per_min,
-		"objects: %d / %d" % [active_objects.filter(func(o): return is_instance_valid(o)).size(), MAX_OBJECTS],
+		"objects: %d / %d" % [active_objects.filter(func(o): return is_instance_valid(o)).size(), GameConfig.max_objects],
 		"──────────",
 	]
 	for type in counts:

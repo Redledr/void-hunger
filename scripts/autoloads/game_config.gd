@@ -1,14 +1,5 @@
-[gd_scene format=3 uid="uid://c8llg14dvo15t"]
-
-[ext_resource type="Script" uid="uid://cfrj5krn7ixd4" path="res://scripts/main.gd" id="1_o5qli"]
-[ext_resource type="PackedScene" uid="uid://daw55i4tb67ke" path="res://scenes/black_hole.tscn" id="2_sugp2"]
-[ext_resource type="PackedScene" uid="uid://ji8f8wd5hsuv" path="res://scenes/ui.tscn" id="3_jyhfs"]
-[ext_resource type="Script" uid="uid://c1ifc3v4sq26d" path="res://scripts/background.gd" id="4_rarhs"]
-[ext_resource type="PackedScene" uid="uid://bj6tugu27xi02" path="res://scenes/skilltree.tscn" id="5_tbgi4"]
-[ext_resource type="Script" uid="uid://dgl3fyfptyuln" path="res://scripts/particle_manager.gd" id="6_tefeu"]
-
-[sub_resource type="GDScript" id="GDScript_c01mt"]
-script/source = "@tool
+@tool
+class_name GameConfigClass
 extends Node
 
 # ── Static self-reference so any script can do GameConfig.nudge_radius ──────
@@ -18,86 +9,42 @@ func _enter_tree() -> void:
 	instance = self
 
 # ── Spawning ──────────────────────────────────────────────────────────────────
-@export_group(\"Spawning\")
+@export_group("Spawning")
 @export var spawn_interval_base:   float = 2.0
 @export var spawn_interval_min:    float = 0.3
 @export var max_objects:           int   = 40
 
 # ── Passive Pull ──────────────────────────────────────────────────────────────
-@export_group(\"Passive Pull\")
+@export_group("Passive Pull")
 @export var passive_pull_base:     float = 0.3
 @export var passive_pull_scale:    float = 0.0
 @export var orbit_radius_min:      float = 150.0
 @export var orbit_radius_max:      float = 280.0
 
 # ── Nudge ─────────────────────────────────────────────────────────────────────
-@export_group(\"Nudge\")
+@export_group("Nudge")
 @export var nudge_radius:          float = 80.0
 @export var nudge_strength:        float = 120.0
 @export var nudge_lerp_boost:      float = 5.0
 @export var base_lerp_speed:       float = 2.5
 
 # ── Spiral ────────────────────────────────────────────────────────────────────
-@export_group(\"Spiral\")
+@export_group("Spiral")
 @export var spiral_rate_default:   float = 60.0
 
 # ── Energy ────────────────────────────────────────────────────────────────────
-@export_group(\"Energy\")
+@export_group("Energy")
 @export var energy_per_mass_unit:  float = 0.1
 
 # ── Black Hole ────────────────────────────────────────────────────────────────
-@export_group(\"Black Hole\")
+@export_group("Black Hole")
 @export var black_hole_base_size:  float = 40.0
 @export var black_hole_mass_scale: float = 4.0
+@export var rotation_speed:        float = 0.18  # add this
+@export var disk_tilt:        float = 0.55   # was 0.35 — more visible angle
+@export var disk_inner_scale: float = 1.2    # was 1.3
+@export var disk_outer_scale: float = 2.8    # was 2.2 — wider spread
 
 # ── Trail ─────────────────────────────────────────────────────────────────────
-@export_group(\"Trail\")
+@export_group("Trail")
 @export var trail_length_default:  int   = 20
-"
-
-[node name="Node2D" type="Node2D" unique_id=688130031]
-script = ExtResource("1_o5qli")
-
-[node name="BlackHole" parent="." unique_id=1890442564 instance=ExtResource("2_sugp2")]
-position = Vector2(960, 540)
-
-[node name="UI" parent="." unique_id=1798438073 instance=ExtResource("3_jyhfs")]
-
-[node name="SpawnTimer" type="Timer" parent="." unique_id=1783939337]
-
-[node name="DebugLabel" type="Label" parent="." unique_id=239842746]
-anchors_preset = 6
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = 1847.0
-offset_top = 733.0
-offset_right = 1887.0
-offset_bottom = 756.0
-grow_horizontal = 0
-grow_vertical = 2
-horizontal_alignment = 2
-
-[node name="Control" type="Control" parent="." unique_id=14342914]
-custom_minimum_size = Vector2(1920, 1080)
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = 1920.0
-offset_bottom = 1080.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Background" type="CanvasLayer" parent="Control" unique_id=1071963811]
-layer = -2
-script = ExtResource("4_rarhs")
-
-[node name="SkillTree" parent="." unique_id=1443081458 instance=ExtResource("5_tbgi4")]
-
-[node name="ParticleManager" type="Node2D" parent="." unique_id=197367952]
-script = ExtResource("6_tefeu")
-
-[node name="GameConfig" type="Node" parent="." unique_id=1118619476]
-script = SubResource("GDScript_c01mt")

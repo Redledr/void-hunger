@@ -20,6 +20,7 @@ config/features=PackedStringArray("4.6", "GL Compatibility")
 GameState="*uid://blk8c2gp5gndn"
 ObjectData="*uid://d13e7r77e60gf"
 SkillData="*uid://cmmnmqux6fla4"
+GameConfig="*uid://bo10k1g8776pj"
 
 [display]
 

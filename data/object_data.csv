@@ -1,30 +1,54 @@
 key,display_name,mass,size,color_r,color_g,color_b,nudge_resist
-quark,Quark,0.10,1.00,0.55,0.55,0.95,0.00
-electron,Electron,0.12,2.00,0.60,0.60,1.00,0.00
-proton,Proton,0.15,3.00,0.70,0.65,1.00,0.00
-neutron,Neutron,0.18,4.00,0.75,0.70,1.00,0.00
-dust,Dust,0.30,5.00,0.65,0.62,0.55,0.00
-atom,Atom,0.50,6.00,0.50,0.80,1.00,0.00
-molecule,Molecule,0.90,7.00,0.40,0.75,0.95,0.00
-cells,Cells,1.20,8.00,0.30,0.70,0.85,0.00
-bacterium,Bacterium,1.50,8.00,0.30,0.65,0.75,0.00
-virus,Virus,2.00,9.00,0.35,0.60,0.80,0.10
-sand,Sand,3.00,10.00,0.76,0.70,0.55,0.00
-pebbles,Pebbles,6.00,11.00,0.62,0.58,0.50,0.00
-rocks,Rocks,12.00,12.00,0.48,0.48,0.52,0.10
-boulders,Boulders,25.00,13.00,0.38,0.38,0.42,0.15
-mountains,Mountains,60.00,14.00,0.30,0.30,0.35,0.20
-asteroid,Asteroid,120.00,15.00,0.65,0.52,0.42,0.20
-planet,Planet,500.00,18.00,0.25,0.55,0.95,0.25
-dwarfstar,Dwarf Star,2500.00,22.00,1.00,0.95,0.60,0.30
-star,Star,5000.00,24.00,1.00,0.85,0.30,0.30
-redgiant,Red Giant,12000.00,28.00,1.00,0.45,0.15,0.35
-neutron_star,Neutron Star,30000.00,30.00,0.90,0.30,1.00,0.40
-starcluster,Star Cluster,80000.00,32.00,1.00,0.90,0.50,0.30
-nebula,Nebula,150000.00,34.00,0.70,0.40,1.00,0.20
-galaxy,Galaxy,800000.00,40.00,0.55,0.25,1.00,0.35
-galaxycluster,Galaxy Cluster,5000000.00,46.00,1.00,0.45,0.75,0.40
-supercluster,Supercluster,20000000.00,52.00,0.85,0.60,1.00,0.45
-observableuniversefragment,Obs. Universe Fragment,100000000.00,60.00,0.85,0.85,1.00,0.50
-observableuniverse,Observable Universe,500000000.00,68.00,1.00,1.00,1.00,0.60
-multiverse,Multiverse,5000000000.00,80.00,1.00,0.98,0.90,0.70
+string,Quantum String,0.010,1.000,0.800,0.400,1.000,0.000
+photon,Photon,0.050,1.000,1.000,0.950,0.600,0.000
+neutrino,Neutrino,0.080,1.000,0.600,0.900,1.000,0.000
+quark,Quark,0.100,1.000,0.550,0.550,0.950,0.000
+electron,Electron,0.120,2.000,0.600,0.600,1.000,0.000
+proton,Proton,0.150,3.000,0.700,0.650,1.000,0.000
+neutron,Neutron,0.180,4.000,0.750,0.700,1.000,0.000
+dust,Dust,0.300,5.000,0.650,0.620,0.550,0.000
+atom,Atom,0.500,6.000,0.500,0.800,1.000,0.000
+molecule,Molecule,0.900,7.000,0.400,0.750,0.950,0.000
+cells,Cells,1.200,8.000,0.300,0.700,0.850,0.000
+bacterium,Bacterium,1.500,8.000,0.300,0.650,0.750,0.000
+virus,Virus,2.000,9.000,0.350,0.600,0.800,0.100
+spore,Spore,1.800,9.000,0.400,0.750,0.350,0.000
+crystal,Crystal,2.500,10.000,0.700,0.850,1.000,0.000
+raindrop,Raindrop,4.000,10.000,0.300,0.600,1.000,0.000
+sand,Sand,3.000,10.000,0.760,0.700,0.550,0.000
+grain,Grain of Sand,5.000,10.000,0.800,0.720,0.500,0.000
+pebbles,Pebbles,6.000,11.000,0.620,0.580,0.500,0.000
+rocks,Rocks,12.000,12.000,0.480,0.480,0.520,0.100
+icechunk,Ice Chunk,18.000,13.000,0.750,0.880,1.000,0.000
+boulders,Boulders,25.000,13.000,0.380,0.380,0.420,0.150
+mountains,Mountains,60.000,14.000,0.300,0.300,0.350,0.200
+meteoroid,Meteoroid,40.000,14.000,0.550,0.480,0.400,0.100
+comet,Comet,80.000,15.000,0.700,0.850,1.000,0.150
+asteroid,Asteroid,120.000,15.000,0.650,0.520,0.420,0.200
+moon,Moon,300.000,17.000,0.750,0.750,0.780,0.200
+planet,Planet,500.000,18.000,0.250,0.550,0.950,0.250
+ringedplanet,Ringed Planet,800.000,20.000,0.850,0.700,0.450,0.250
+gasplanet,Gas Giant,1500.000,21.000,0.900,0.600,0.350,0.280
+dwarfstar,Dwarf Star,2500.000,22.000,1.000,0.950,0.600,0.300
+browndwarf,Brown Dwarf,3500.000,22.000,0.550,0.350,0.200,0.280
+star,Star,5000.000,24.000,1.000,0.850,0.300,0.300
+binarystar,Binary Star,7500.000,25.000,1.000,0.900,0.500,0.300
+redgiant,Red Giant,12000.000,28.000,1.000,0.450,0.150,0.350
+supergiant,Supergiant,18000.000,29.000,1.000,0.300,0.100,0.350
+neutron_star,Neutron Star,30000.000,30.000,0.900,0.300,1.000,0.400
+magnetar,Magnetar,45000.000,31.000,0.600,0.200,1.000,0.400
+protostar,Protostar,60000.000,26.000,1.000,0.550,0.200,0.250
+starcluster,Star Cluster,80000.000,32.000,1.000,0.900,0.500,0.300
+nebula,Nebula,150000.000,34.000,0.700,0.400,1.000,0.200
+molecularcloud,Molecular Cloud,120000.000,33.000,0.500,0.300,0.800,0.200
+galaxy,Galaxy,800000.000,40.000,0.550,0.250,1.000,0.350
+voidfilament,Void Filament,600000.000,38.000,0.400,0.200,0.700,0.300
+galaxycluster,Galaxy Cluster,5000000.000,46.000,1.000,0.450,0.750,0.400
+cosmicweb,Cosmic Web Node,3000000.000,44.000,0.700,0.500,1.000,0.380
+supercluster,Supercluster,20000000.000,52.000,0.850,0.600,1.000,0.450
+observableuniversefragment,Obs. Universe Fragment,100000000.000,60.000,0.850,0.850,1.000,0.500
+observableuniverse,Observable Universe,500000000.000,68.000,1.000,1.000,1.000,0.600
+multiverse,Multiverse,5000000000.000,80.000,1.000,0.980,0.900,0.700
+paralleluniverse,Parallel Universe,8000000000.000,85.000,0.850,0.700,1.000,0.720
+omniversefragment,Omniverse Fragment,50000000000.000,95.000,1.000,0.850,0.950,0.750
+omniverse,Omniverse,200000000000.000,110.000,1.000,1.000,0.980,0.800

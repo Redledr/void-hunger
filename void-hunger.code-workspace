@@ -1,10 +1,33 @@
 {
-    "folders": [
-        {
-            "path": "."
-        }
-    ],
-    "settings": {
-        "godotTools.editorPath.godot4": "d:\\SteamLibrary\\steamapps\\common\\Godot Engine\\godot.windows.opt.tools.64.exe"
-    }
+  "folders": [
+    {
+      "path": ".",
+    },
+  ],
+  "settings": {
+    "godotTools.editorPath.godot4": "c:\\Program Files (x86)\\Steam\\steamapps\\common\\Godot Engine\\godot.windows.opt.tools.64.exe",
+    "window.autoDetectColorScheme": true,
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "files.exclude": {
+      "**/*.tscn": true,
+      "**/*.tres": true,
+      "**/*.import": true,
+      //"**/*.cfg": false,
+      "**/*.png": true,
+      "**/*.wav": true,
+      "**/*.ogg": true,
+      "**/*.svg": true,
+      //"**/*.csv": false,
+      "**/*.md": true,
+      "**/*.uid": true,
+      ".godot/": true,
+      //"addons/": false,
+    },
+    "search.exclude": {
+      "**/*.tscn": true,
+      "**/*.import": true,
+      ".godot/": true,
+    },
+  },
 }

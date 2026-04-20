@@ -7,8 +7,8 @@ signal energy_changed
 signal skill_purchased(id: int)
 signal object_absorbed
 
-var mass:     float = 0.0
-var energy:   float = 0.0
+var mass: float = 0.0
+var energy: float = 0.0
 var elapsed_time: float = 0.0
 var particles: Node = null
 var unlocked_skills: Dictionary = {}
@@ -35,7 +35,7 @@ func add_energy(amount: float) -> void:
 
 func has_skill(effect: String) -> bool:
 	for id in unlocked_skills:
-		var node := SkillData.get_skill_node(id)
+		var node: Dictionary = SkillData.get_skill_node(id)
 		if node.get("effect", "") == effect:
 			return true
 	return false
@@ -43,7 +43,7 @@ func has_skill(effect: String) -> bool:
 func get_skill_value(effect: String, default_val: float) -> float:
 	var best := default_val
 	for id in unlocked_skills:
-		var node := SkillData.get_skill_node(id)
+		var node: Dictionary = SkillData.get_skill_node(id)
 		if node.get("effect", "") == effect:
 			var v: float = float(node.get("value", default_val))
 			best = maxf(best, v)
@@ -52,7 +52,7 @@ func get_skill_value(effect: String, default_val: float) -> float:
 func can_buy_skill(id: int) -> bool:
 	if unlocked_skills.has(id):
 		return false
-	var node := SkillData.get_skill_node(id)
+	var node: Dictionary = SkillData.get_skill_node(id)
 	if node.is_empty():
 		return false
 	if energy < float(node.get("cost", INF)):
@@ -90,8 +90,8 @@ func get_unlocked_types() -> Array:
 		return []
 
 	var tier_bonus: float = get_skill_value("unlock_tier", 0.0)
-	var lower_bound: float = mass * 0.2
-	var upper_bound: float = mass * (5.0 + tier_bonus * 2.0)
+	var lower_bound: float = maxf(0.05, mass * 0.2)
+	var upper_bound: float = maxf(2.0, mass * (5.0 + tier_bonus * 2.0))
 
 	var result: Array = []
 	for type_name in sorted:
@@ -108,9 +108,9 @@ func get_unlocked_types() -> Array:
 
 func save_game() -> void:
 	var cfg := ConfigFile.new()
-	cfg.set_value("game", "mass",            mass)
-	cfg.set_value("game", "energy",          energy)
-	# Store skill IDs as an array of ints — ConfigFile handles this natively.
+	cfg.set_value("game", "mass", mass)
+	cfg.set_value("game", "energy", energy)
+	cfg.set_value("game", "elapsed_time", elapsed_time)
 	cfg.set_value("game", "unlocked_skills", unlocked_skills.keys())
 	var err := cfg.save(SAVE_PATH)
 	if err != OK:
@@ -123,8 +123,9 @@ func load_game() -> void:
 		# No save file yet — start fresh, that's fine.
 		return
 
-	mass   = float(cfg.get_value("game", "mass",   0.0))
+	mass = float(cfg.get_value("game", "mass", 0.0))
 	energy = float(cfg.get_value("game", "energy", 0.0))
+	elapsed_time = float(cfg.get_value("game", "elapsed_time", 0.0))
 
 	unlocked_skills.clear()
 	var ids: Array = cfg.get_value("game", "unlocked_skills", [])
@@ -137,7 +138,7 @@ func load_game() -> void:
 func delete_save() -> void:
 	if FileAccess.file_exists(SAVE_PATH):
 		DirAccess.remove_absolute(SAVE_PATH)
-	mass   = 0.0
+	mass = 0.0
 	energy = 0.0
 	unlocked_skills.clear()
 	emit_signal("mass_changed")

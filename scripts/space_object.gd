@@ -1,7 +1,6 @@
 extends Node2D
 
 @export var mass_value: float = 1.0
-
 var color: Color = Color.GRAY
 var size:  float = 0.0
 var obj_type: String = ""
@@ -12,16 +11,7 @@ var orbit_speed:         float   = 0.0
 var black_hole_pos:      Vector2 = Vector2.ZERO
 var target_orbit_radius: float   = 0.0
 
-# ── Nudge / spiral ──────────────────────────────────────────────────────────
-const BASE_LERP_SPEED:  float = 2.5
-const NUDGE_LERP_BOOST: float = 5.0
-
-# Passive pull: how many units/sec the target radius shrinks on its own.
-# Scales gently with black hole mass so early game is slow, late game faster.
-const PASSIVE_PULL_BASE:  float = 4.0   # units/sec at mass 0
-const PASSIVE_PULL_SCALE: float = 0.012 # additional units/sec per unit of mass
-
-var _nudge_lerp_speed: float = BASE_LERP_SPEED
+var _nudge_lerp_speed: float = 0.0
 var _spiraling:        bool  = false
 
 # ── Trail (circular buffer) ─────────────────────────────────────────────────
@@ -39,6 +29,9 @@ var _trail_count:int = 0
 func setup(start_pos: Vector2, p_obj_type: String, bh_pos: Vector2) -> void:
 	obj_type       = p_obj_type
 	black_hole_pos = bh_pos
+
+	# Initialize here instead of at declaration so GameConfig is ready
+	_nudge_lerp_speed = GameConfig.base_lerp_speed
 
 	var d := ObjectData.get_data(obj_type)
 	mass_value = d.get("mass", mass_value) * GameState.get_mass_multiplier()
@@ -59,7 +52,7 @@ func setup(start_pos: Vector2, p_obj_type: String, bh_pos: Vector2) -> void:
 
 	position            = start_pos
 	orbit_radius        = start_pos.distance_to(black_hole_pos)
-	target_orbit_radius = randf_range(150.0, 400.0)
+	target_orbit_radius = randf_range(GameConfig.orbit_radius_min, GameConfig.orbit_radius_max)
 	orbit_angle         = (start_pos - black_hole_pos).angle()
 	orbit_speed         = randf_range(0.3, 0.7) * (1.0 if randf() < 0.5 else -1.0)
 
@@ -69,7 +62,7 @@ func setup(start_pos: Vector2, p_obj_type: String, bh_pos: Vector2) -> void:
 	glow.polygon = _make_polygon(visual_sides, size * 1.25)
 	glow.color   = Color(color.r, color.g, color.b, 0.12)
 
-	_max_trail = int(GameState.get_skill_value("trail_length", 20.0))
+	_max_trail = int(GameState.get_skill_value("trail_length", float(GameConfig.trail_length_default)))
 	_trail.resize(_max_trail)
 
 # ── Nudge ───────────────────────────────────────────────────────────────────
@@ -77,7 +70,7 @@ func setup(start_pos: Vector2, p_obj_type: String, bh_pos: Vector2) -> void:
 func apply_nudge(_strength: float = 0.0) -> void:
 	if _spiraling:
 		return
-	var data     := ObjectData.get_data(obj_type)
+	var data: Dictionary = ObjectData.get_data(obj_type)
 	var base_resist: float = data.get("nudge_resist", 0.0)
 	var reduction:   float = GameState.get_skill_value("nudge_resist_reduction", 0.0)
 	var final_resist := maxf(0.0, base_resist - reduction)
@@ -85,25 +78,22 @@ func apply_nudge(_strength: float = 0.0) -> void:
 		return
 
 	_spiraling        = true
-	_nudge_lerp_speed = BASE_LERP_SPEED + NUDGE_LERP_BOOST
+	_nudge_lerp_speed = GameConfig.base_lerp_speed + GameConfig.nudge_lerp_boost
 
 # ── Per-frame ───────────────────────────────────────────────────────────────
 
 func _process(delta: float) -> void:
 	orbit_angle += orbit_speed * delta
 
-	# Passive pull: target slowly drifts inward regardless of nudge.
-	# Rate scales with black hole mass so it stays gentle early, meaningful late.
-	var passive_rate := PASSIVE_PULL_BASE + GameState.mass * PASSIVE_PULL_SCALE
+	var passive_rate := GameConfig.passive_pull_base + GameState.mass * GameConfig.passive_pull_scale
 	target_orbit_radius = maxf(0.0, target_orbit_radius - passive_rate * delta)
 
-	# Nudge/spiral: accelerated inward collapse when triggered.
 	if _spiraling:
-		var rate := GameState.get_skill_value("spiral_rate", 60.0)
+		var rate := GameState.get_skill_value("spiral_rate", GameConfig.spiral_rate_default)
 		target_orbit_radius = maxf(0.0, target_orbit_radius - rate * delta)
 
 	orbit_radius      -= (orbit_radius - target_orbit_radius) * delta * _nudge_lerp_speed
-	_nudge_lerp_speed  = lerpf(_nudge_lerp_speed, BASE_LERP_SPEED, delta * 4.0)
+	_nudge_lerp_speed  = lerpf(_nudge_lerp_speed, GameConfig.base_lerp_speed, delta * 4.0)
 	orbit_radius       = maxf(orbit_radius, 0.0)
 	position           = black_hole_pos + Vector2(cos(orbit_angle), sin(orbit_angle)) * orbit_radius
 
@@ -116,8 +106,8 @@ func _draw() -> void:
 	if _trail_count < 2:
 		return
 	for i in range(_trail_count - 1):
-		var idx_a := (_trail_head + _trail_count - 1 - i)     % _max_trail
-		var idx_b := (_trail_head + _trail_count - 2 - i)     % _max_trail
+		var idx_a := (_trail_head + _trail_count - 1 - i) % _max_trail
+		var idx_b := (_trail_head + _trail_count - 2 - i) % _max_trail
 		var alpha := 1.0 - float(i) / float(_trail_count)
 		draw_line(to_local(_trail[idx_a]), to_local(_trail[idx_b]),
 				  Color(color.r, color.g, color.b, alpha * 0.5), 2.0)
@@ -126,7 +116,7 @@ func _draw() -> void:
 
 func _absorb() -> void:
 	GameState.add_mass(mass_value)
-	GameState.add_energy(mass_value * 0.1)
+	GameState.add_energy(mass_value * GameConfig.energy_per_mass_unit)
 	if GameState.particles != null:
 		GameState.particles.burst(position, color, size)
 	queue_free()

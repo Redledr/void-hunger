@@ -2,8 +2,8 @@
   "editor.formatOnSave": true,
   "files.autoSave": "afterDelay",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "files.exclude": {
-    "**/.uid": true
-  },
-  "editor.formatOnPaste": true
+  "editor.formatOnPaste": true,
+  "[gdscript]": {
+    "editor.defaultFormatter": "geequlim.godot-tools"
+  }
 }
