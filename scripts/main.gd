@@ -2,19 +2,19 @@ extends Node2D
 
 const SPACE_OBJECT_SCENE := preload("res://scenes/space_object.tscn")
 
-@onready var black_hole:        Node2D = $BlackHole
-@onready var spawn_timer:       Timer  = $SpawnTimer
-@onready var debug_label:       Label  = $DebugLabel
-@onready var particle_manager:  Node2D = $ParticleManager
+@onready var black_hole: Node2D = $BlackHole
+@onready var spawn_timer: Timer = $SpawnTimer
+@onready var debug_label: Label = $DebugLabel
+@onready var particle_manager: Node2D = $ParticleManager
 
-var _absorb_count:        int   = 0
-var _absorb_timer:        float = 0.0
-var _absorbs_per_min:     float = 0.0
+var _absorb_count: int = 0
+var _absorb_timer: float = 0.0
+var _absorbs_per_min: float = 0.0
 var _avg_mass_per_absorb: float = 1.0
 var _mass_at_last_sample: float = 0.0
-var screen_size:    Vector2 = Vector2.ZERO
-var active_objects: Array   = []
-var mouse_pos:      Vector2 = Vector2.ZERO
+var screen_size: Vector2 = Vector2.ZERO
+var active_objects: Array = []
+var mouse_pos: Vector2 = Vector2.ZERO
 var test_energy: float = 0.0
 var _nudge_unlocked: bool = false
 
@@ -94,7 +94,7 @@ func _random_edge_position() -> Vector2:
 	match randi() % 4:
 		0: return Vector2(randf() * screen_size.x, 0.0)
 		1: return Vector2(randf() * screen_size.x, screen_size.y)
-		2: return Vector2(0.0,           randf() * screen_size.y)
+		2: return Vector2(0.0, randf() * screen_size.y)
 		_: return Vector2(screen_size.x, randf() * screen_size.y)
 
 # ── Signals ──────────────────────────────────────────────────────────────────
@@ -116,27 +116,27 @@ func register_absorption() -> void:
 func _update_debug(delta: float) -> void:
 	_absorb_timer += delta
 
-	if _absorb_timer >= 10.0:
+	if _absorb_timer >= GameConfig.debug_sample_window:
 		_absorbs_per_min = (_absorb_count / _absorb_timer) * 60.0
 		if _absorb_count > 0:
-			var mass_gained      := GameState.mass - _mass_at_last_sample
-			_avg_mass_per_absorb  = mass_gained / float(_absorb_count)
+			var mass_gained := GameState.mass - _mass_at_last_sample
+			_avg_mass_per_absorb = mass_gained / float(_absorb_count)
 		_mass_at_last_sample = GameState.mass
-		_absorb_count        = 0
-		_absorb_timer        = 0.0
+		_absorb_count = 0
+    	_absorb_timer = 0.0
 
 	var passive_rate := GameConfig.passive_pull_base + GameState.mass * GameConfig.passive_pull_scale
 
-	var e           := GameState.elapsed_time
+	var e := GameState.elapsed_time
 	var elapsed_str := "%02d:%02d" % [int(e / 60), int(e) % 60]
 
 	var eta_str := "??:??"
 	if _absorbs_per_min > 0.0:
 		var mass_per_min := _absorbs_per_min * _avg_mass_per_absorb
-		var mass_needed  := maxf(0.0, 500.0 - GameState.mass)
+		var mass_needed := maxf(0.0, GameConfig.debug_eta_target_mass - GameState.mass)
 		if mass_per_min > 0.0:
-			var mins    := mass_needed / mass_per_min
-			eta_str      = "%02d:%02d" % [int(mins), int(mins * 60.0) % 60]
+			var mins := mass_needed / mass_per_min
+			eta_str = "%02d:%02d" % [int(mins), int(mins * 60.0) % 60]
 
 	var counts: Dictionary = {}
 	for obj in active_objects:
@@ -145,12 +145,12 @@ func _update_debug(delta: float) -> void:
 
 	var lines: Array = [
 		"── debug ──",
-		"time:    %s"      % elapsed_str,
-		"eta mid: %s"      % eta_str,
-		"mass:    %.1f"    % GameState.mass,
-		"energy:  %.1f"    % GameState.energy,
-		"pull/s:  %.2f"    % passive_rate,
-		"abs/min: %.1f"    % _absorbs_per_min,
+		"time:    %s" % elapsed_str,
+		"eta mid: %s" % eta_str,
+		"mass:    %.1f" % GameState.mass,
+		"energy:  %.1f" % GameState.energy,
+		"pull/s:  %.2f" % passive_rate,
+		"abs/min: %.1f" % _absorbs_per_min,
 		"objects: %d / %d" % [active_objects.filter(func(o): return is_instance_valid(o)).size(), GameConfig.max_objects],
 		"──────────",
 	]
