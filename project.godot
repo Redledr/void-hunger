@@ -12,7 +12,7 @@ config_version=5
 
 config/name="Void Hunger"
 config/version="0.0.1"
-run/main_scene="uid://c8llg14dvo15t"
+run/main_scene="uid://cmwk23mi3jd2p"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 
 [autoload]

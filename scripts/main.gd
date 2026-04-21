@@ -12,11 +12,10 @@ var _absorb_timer:        float = 0.0
 var _absorbs_per_min:     float = 0.0
 var _avg_mass_per_absorb: float = 1.0
 var _mass_at_last_sample: float = 0.0
-
 var screen_size:    Vector2 = Vector2.ZERO
 var active_objects: Array   = []
 var mouse_pos:      Vector2 = Vector2.ZERO
-
+var test_energy: float = 0.0
 var _nudge_unlocked: bool = false
 
 func _ready() -> void:
@@ -33,6 +32,11 @@ func _ready() -> void:
 	GameState.skill_purchased.connect(_on_skill_purchased)
 	GameState.object_absorbed.connect(register_absorption)
 
+	print("test_energy value: ", GameConfig.test_energy)
+	GameState.energy = GameConfig.test_energy
+	GameState.emit_signal("energy_changed")
+	print("energy after set: ", GameState.energy)
+	
 	_nudge_unlocked = GameState.has_skill("mechanic_nudge")
 
 # ── Input ────────────────────────────────────────────────────────────────────

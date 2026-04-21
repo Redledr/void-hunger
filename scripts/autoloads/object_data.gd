@@ -58,7 +58,7 @@ func _load_csv() -> void:
 	file.close()
 
 	print("ObjectData: loaded %d types" % DATA.size())
-	print(JSON.stringify(DATA, "\t"))
+	#print(JSON.stringify(DATA, "\t"))
 
 func get_data(type: String) -> Dictionary:
 	return DATA.get(type, {})

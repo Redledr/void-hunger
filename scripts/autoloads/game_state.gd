@@ -77,7 +77,7 @@ func buy_skill(id: int) -> bool:
 
 func get_spawn_interval() -> float:
 	var multiplier := get_skill_value("spawn_rate", 1.0)
-	return maxf(0.3, 2.0 * multiplier)
+	return maxf(GameConfig.spawn_interval_min, GameConfig.spawn_interval_base * multiplier)
 
 func get_mass_multiplier() -> float:
 	return 1.0 + get_skill_value("mass_multi", 0.0)
@@ -90,8 +90,8 @@ func get_unlocked_types() -> Array:
 		return []
 
 	var tier_bonus: float = get_skill_value("unlock_tier", 0.0)
-	var lower_bound: float = maxf(0.05, mass * 0.2)
-	var upper_bound: float = maxf(2.0, mass * (5.0 + tier_bonus * 2.0))
+	var lower_bound: float = maxf(GameConfig.spawn_mass_lower_floor, mass * GameConfig.spawn_mass_lower_mult)
+	var upper_bound: float = maxf(GameConfig.spawn_mass_upper_floor, mass * (GameConfig.spawn_mass_upper_mult + tier_bonus * GameConfig.spawn_tier_bonus_scalar))
 
 	var result: Array = []
 	for type_name in sorted:

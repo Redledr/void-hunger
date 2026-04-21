@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cmwk23mi3jd2p"]
 
-[ext_resource type="Script" uid="uid://ngddqlarqcyk" path="res://scenes/start_screen.gd" id="1_tx5wa"]
+[ext_resource type="Script" uid="uid://ngddqlarqcyk" path="res://scripts/start_screen.gd" id="1_tx5wa"]
 
 [node name="StartScreen" type="Control" unique_id=1105241481]
 layout_mode = 3
@@ -36,11 +36,6 @@ custom_minimum_size = Vector2(100, 50)
 layout_mode = 2
 text = "Continue"
 
-[node name="LoadButton" type="Button" parent="VBox" unique_id=249781108]
-custom_minimum_size = Vector2(100, 50)
-layout_mode = 2
-text = "Load"
-
 [node name="SettingsButton" type="Button" parent="VBox" unique_id=850704305]
 custom_minimum_size = Vector2(100, 50)
 layout_mode = 2
@@ -51,8 +46,10 @@ custom_minimum_size = Vector2(100, 50)
 layout_mode = 2
 text = "Exit"
 
+[node name="SaveInfoLabel" type="Label" parent="VBox" unique_id=1598196466]
+layout_mode = 2
+
 [connection signal="pressed" from="VBox/NewButton" to="." method="_on_new_button_pressed"]
 [connection signal="pressed" from="VBox/ContinueButton" to="." method="_on_continue_button_pressed"]
-[connection signal="pressed" from="VBox/LoadButton" to="." method="_on_load_button_pressed"]
 [connection signal="pressed" from="VBox/SettingsButton" to="." method="_on_settings_button_pressed"]
 [connection signal="pressed" from="VBox/ExitButton" to="." method="_on_exit_button_pressed"]
