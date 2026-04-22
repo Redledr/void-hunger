@@ -50,7 +50,7 @@ func setup(start_pos: Vector2, p_obj_type: String, bh_pos: Vector2) -> void:
 	target_orbit_radius = randf_range(GameConfig.orbit_radius_min, GameConfig.orbit_radius_max)
 	orbit_angle = (start_pos - black_hole_pos).angle()
 	orbit_speed = randf_range(GameConfig.orbit_speed_min, GameConfig.orbit_speed_max) \
-	                      * (1.0 if randf() < GameConfig.orbit_reverse_chance else -1.0)
+						  * (1.0 if randf() < GameConfig.orbit_reverse_chance else -1.0)
 
 	var visual_sides := 16 if sides <= 3 else sides
 	body.polygon = _make_polygon(visual_sides, size / 2.0)
@@ -103,10 +103,20 @@ func _draw() -> void:
 				  GameConfig.trail_line_width)
 
 func _absorb() -> void:
-	GameState.add_mass(mass_value)
-	GameState.add_energy(mass_value * GameConfig.energy_per_mass_unit)
+	var crit_chance: float = GameState.get_skill_value("crit_chance", 0.0)
+	var is_crit:     bool  = randf() < crit_chance
+	var multiplier:  float = 5.0 if is_crit else 1.0
+	var gained:      float = mass_value * multiplier
+
+	GameState.add_mass(gained)
+	GameState.add_energy(gained * GameConfig.energy_per_mass_unit)
+
 	if GameState.particles != null:
 		GameState.particles.burst(position, color, size)
+
+	# notify main for cascade, combo, flash, floating text
+	GameState.emit_signal("object_absorbed_detail", position, gained, color, size, is_crit)
+
 	queue_free()
 
 func _on_hit_area_area_entered(_area: Area2D) -> void:

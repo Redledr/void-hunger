@@ -55,6 +55,9 @@ size_flags_horizontal = 8
 text = "Energy: 0.0"
 vertical_alignment = 1
 
+[node name="MassLabel" type="Label" parent="Overlay/Panel/VBox/Header" unique_id=1614973096]
+layout_mode = 2
+
 [node name="CloseButton" type="Button" parent="Overlay/Panel/VBox/Header" unique_id=1668938071]
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2

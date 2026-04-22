@@ -1,24 +1,24 @@
+# skilltree.gd
 extends CanvasLayer
 
-@onready var overlay:        ColorRect       = $Overlay
-@onready var energy_label:   Label           = $Overlay/Panel/VBox/Header/EnergyLabel
-@onready var close_button:   Button          = $Overlay/Panel/VBox/Header/CloseButton
-@onready var node_container: VBoxContainer   = $Overlay/Panel/VBox/Scroll/NodeContainer
+@onready var overlay:        ColorRect     = $Overlay
+@onready var energy_label:   Label         = $Overlay/Panel/VBox/Header/EnergyLabel
+@onready var mass_label:     Label         = $Overlay/Panel/VBox/Header/MassLabel
+@onready var close_button:   Button        = $Overlay/Panel/VBox/Header/CloseButton
+@onready var node_container: VBoxContainer = $Overlay/Panel/VBox/Scroll/NodeContainer
 
-# Holds references to each skill row so we can refresh them cheaply.
 var _rows: Dictionary = {}
 
 func _ready() -> void:
-	hide()   # starts hidden — shown on demand
-
+	hide()
 	close_button.pressed.connect(hide_tree)
-	GameState.energy_changed.connect(_refresh_energy)
+	GameState.energy_changed.connect(_refresh_header)
+	GameState.mass_changed.connect(_on_mass_changed)
 	GameState.skill_purchased.connect(_on_skill_purchased)
-
 	_build_tree()
-	_refresh_energy()
+	_refresh_header()
 
-# ── Public API ───────────────────────────────────────────────────────────────
+# ── Public API ────────────────────────────────────────────────────────────────
 
 func show_tree() -> void:
 	_refresh_all_rows()
@@ -30,53 +30,41 @@ func hide_tree() -> void:
 	get_tree().paused = false
 
 # ── Build ─────────────────────────────────────────────────────────────────────
-# Creates one row per skill node. Rows are grouped by depth so prerequisites
-# read top-to-bottom without needing a canvas layout.
 
 func _build_tree() -> void:
-	# Group node IDs by their depth (longest prereq chain).
-	var depths := _compute_depths()
-	var by_depth: Dictionary = {}
-	for id in depths:
-		var d: int = depths[id]
-		if not by_depth.has(d):
-			by_depth[d] = []
-		by_depth[d].append(id)
+	var branches: Dictionary = {}
+	for id in SkillData.get_all_ids():
+		var branch: String = SkillData.get_skill(id).get("branch", "misc")
+		if not branches.has(branch):
+			branches[branch] = []
+		branches[branch].append(id)
 
-	var sorted_depths := by_depth.keys()
-	sorted_depths.sort()
+	for branch in branches:
+		var header := Label.new()
+		header.text = "── %s ──" % branch.to_upper()
+		header.add_theme_color_override("font_color", Color(0.6, 0.5, 0.9))
+		node_container.add_child(header)
 
-	for depth in sorted_depths:
-		# Separator label showing tier.
-		var sep := Label.new()
-		sep.text = "── Tier %d ──" % (depth + 1)
-		sep.add_theme_color_override("font_color", Color(0.5, 0.5, 0.6))
-		node_container.add_child(sep)
-
-		# Sort IDs within tier for stable ordering.
-		var ids: Array = by_depth[depth]
+		var ids: Array = branches[branch]
 		ids.sort()
 		for id in ids:
 			node_container.add_child(_make_row(id))
 
 func _make_row(id: int) -> HBoxContainer:
-	var data := SkillData.get_skill_node(id)
-
 	var row := HBoxContainer.new()
 	row.name = "Row_%d" % id
 
-	# Buy button.
+	# Upgrade button
 	var btn := Button.new()
-	btn.name         = "Btn"
-	btn.custom_minimum_size = Vector2(160, 36)
-	btn.pressed.connect(_on_buy_pressed.bind(id))
+	btn.name = "Btn"
+	btn.custom_minimum_size = Vector2(180, 40)
+	btn.pressed.connect(_on_upgrade_pressed.bind(id))
 	row.add_child(btn)
 
-	# Description label.
+	# Info label
 	var lbl := Label.new()
-	lbl.name              = "Desc"
-	lbl.text              = "%s\n%s" % [data.get("desc", ""), _prereq_text(id)]
-	lbl.autowrap_mode     = TextServer.AUTOWRAP_WORD
+	lbl.name = "Info"
+	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD
 	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	lbl.add_theme_font_size_override("font_size", 11)
 	lbl.add_theme_color_override("font_color", Color(0.75, 0.75, 0.8))
@@ -88,9 +76,9 @@ func _make_row(id: int) -> HBoxContainer:
 
 # ── Refresh ───────────────────────────────────────────────────────────────────
 
-func _refresh_energy() -> void:
+func _refresh_header() -> void:
 	energy_label.text = "Energy: %s" % snapped(GameState.energy, 0.1)
-	_refresh_all_rows()
+	mass_label.text   = "Mass: %s"   % snapped(GameState.mass,   0.1)
 
 func _refresh_all_rows() -> void:
 	for id in _rows:
@@ -100,67 +88,62 @@ func _refresh_row(id: int) -> void:
 	if not _rows.has(id):
 		return
 
-	var row  := _rows[id] as HBoxContainer
-	var btn  := row.get_node("Btn")  as Button
-	var data := SkillData.get_skill_node(id)
-	var cost := float(data.get("cost", 0.0))
+	var row          := _rows[id] as HBoxContainer
+	var btn          := row.get_node("Btn")  as Button
+	var lbl          := row.get_node("Info") as Label
+	var skill:        Dictionary = SkillData.get_skill(id)
+	var current:      int        = GameState.get_skill_level(id)
+	var max_level:    int        = SkillData.get_max_level(id)
+	var label:        String     = skill.get("label", str(id))
 
-	if GameState.unlocked_skills.has(id):
-		btn.text     = "✓ %s" % data.get("label", str(id))
+	# Build pip string  ■■□□
+	var pips := ""
+	for i in range(max_level):
+		pips += "■" if i < current else "□"
+
+	if current >= max_level:
+		# Fully maxed
+		btn.text     = "%s\n%s MAX" % [label, pips]
 		btn.disabled = true
 		btn.modulate = Color(0.3, 0.9, 0.4)
-	elif GameState.can_buy_skill(id):
-		btn.text     = "%s\n[%s E]" % [data.get("label", str(id)), snapped(cost, 0.1)]
-		btn.disabled = false
-		btn.modulate = Color(1.0, 1.0, 1.0)
+		lbl.text     = "Fully upgraded."
 	else:
-		btn.text     = "🔒 %s\n[%s E]" % [data.get("label", str(id)), snapped(cost, 0.1)]
-		btn.disabled = true
-		btn.modulate = Color(0.4, 0.4, 0.45)
+		var next_data: Dictionary = SkillData.get_level_data(id, current + 1)
+		var cost_e: int           = int(next_data.get("cost_energy", 0))
+		var req_mass: float       = float(next_data.get("unlock_mass", 0.0))
+		var locked: bool          = GameState.is_skill_mass_locked(id)
+		var affordable: bool      = GameState.can_upgrade_skill(id)
 
-func _on_skill_purchased(id: int) -> void:
-	_refresh_row(id)
-	# Refresh siblings — purchasing may unlock their prereqs.
-	for other_id in _rows:
-		if id in SkillData.get_skill_node(other_id).get("prereqs", []):
-			_refresh_row(other_id)
+		btn.text = "%s\n%s L%d→%d" % [label, pips, current, current + 1]
+
+		if locked:
+			btn.disabled = true
+			btn.modulate = Color(0.35, 0.35, 0.4)
+			lbl.text     = "Requires %.0f mass\nCosts %d energy" % [req_mass, cost_e]
+		elif affordable:
+			btn.disabled = false
+			btn.modulate = Color(1.0, 1.0, 1.0)
+			lbl.text     = "Costs %d energy" % cost_e
+		else:
+			btn.disabled = true
+			btn.modulate = Color(0.5, 0.4, 0.4)
+			lbl.text     = "Need %d energy (have %.0f)\nRequires %.0f mass" \
+							% [cost_e, GameState.energy, req_mass]
 
 # ── Input ─────────────────────────────────────────────────────────────────────
 
-func _on_buy_pressed(id: int) -> void:
-	GameState.buy_skill(id)
+func _on_upgrade_pressed(id: int) -> void:
+	GameState.upgrade_skill(id)
+
+func _on_skill_purchased(id: int) -> void:
+	_refresh_row(id)
+	_refresh_header()
+
+func _on_mass_changed() -> void:
+	if visible:
+		_refresh_all_rows()
+		_refresh_header()
 
 func _unhandled_input(event: InputEvent) -> void:
-	# Let Escape close the tree.
 	if visible and event.is_action_pressed("ui_cancel"):
 		hide_tree()
-
-# ── Helpers ───────────────────────────────────────────────────────────────────
-
-func _prereq_text(id: int) -> String:
-	var prereqs: Array = SkillData.get_skill_node(id).get("prereqs", [])
-	if prereqs.is_empty():
-		return ""
-	var names := prereqs.map(func(p): return SkillData.get_skill_node(p).get("label", str(p)))
-	return "Requires: %s" % ", ".join(names)
-
-# Computes the depth of each node (longest path from root).
-# Depth 0 = no prerequisites.
-func _compute_depths() -> Dictionary:
-	var depths: Dictionary = {}
-	for id in SkillData.get_all_ids():
-		_depth_of(id, depths)
-	return depths
-
-func _depth_of(id: int, cache: Dictionary) -> int:
-	if cache.has(id):
-		return cache[id]
-	var prereqs: Array = SkillData.get_skill_node(id).get("prereqs", [])
-	if prereqs.is_empty():
-		cache[id] = 0
-		return 0
-	var max_parent := 0
-	for p in prereqs:
-		max_parent = maxi(max_parent, _depth_of(p, cache))
-	cache[id] = max_parent + 1
-	return cache[id]

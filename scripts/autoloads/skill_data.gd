@@ -1,153 +1,191 @@
 # skill_data.gd
 # Autoload singleton — Project > Autoloads as "SkillData"
-#
-# Skill structure (prereqs, effects) lives here as source of truth.
-# Cost and value are patched at startup from res://data/skill_data.csv,
-# auto-downloaded from Google Sheets.
-#
-# To change costs/values: edit the Google Sheet, hit Play.
-# To change structure (prereqs, effects): edit NODES below.
 extends Node
 
-var NODES: Dictionary = {
+var SKILLS: Dictionary = {
+
+	# ── PULL ─────────────────────────────────────────────────────────────────
+
 	1: {
-		"label":   "Nudge",
-		"desc":    "Unlock the ability to nudge objects into a death spiral.",
-		"cost":    10.0,
-		"prereqs": [],
-		"effect":  "mechanic_nudge",
-		"value":   1,
+		"label":  "Passive Drag",
+		"branch": "pull",
+		"levels": [
+			{ "effect": "spiral_rate", "value": 30.0,  "cost_energy": 10,   "unlock_mass": 0     },
+			{ "effect": "spiral_rate", "value": 45.0,  "cost_energy": 25,   "unlock_mass": 50    },
+			{ "effect": "spiral_rate", "value": 60.0,  "cost_energy": 60,   "unlock_mass": 200   },
+			{ "effect": "spiral_rate", "value": 80.0,  "cost_energy": 120,  "unlock_mass": 500   },
+		]
 	},
 	2: {
-		"label":   "Faster Spiral",
-		"desc":    "Nudged objects spiral inward 50% faster.",
-		"cost":    20.0,
-		"prereqs": [1],
-		"effect":  "spiral_rate",
-		"value":   90.0,
-	},
-	5: {
-		"label":   "Death Spiral",
-		"desc":    "Spiral rate doubled. Objects have no escape.",
-		"cost":    45.0,
-		"prereqs": [2],
-		"effect":  "spiral_rate",
-		"value":   140.0,
+		"label":  "Hungry Void",
+		"branch": "pull",
+		"levels": [
+			{ "effect": "pull_scale",  "value": 1.5,   "cost_energy": 20,   "unlock_mass": 30    },
+			{ "effect": "pull_scale",  "value": 2.0,   "cost_energy": 50,   "unlock_mass": 150   },
+			{ "effect": "pull_scale",  "value": 3.0,   "cost_energy": 100,  "unlock_mass": 400   },
+			{ "effect": "pull_scale",  "value": 4.5,   "cost_energy": 200,  "unlock_mass": 1000  },
+		]
 	},
 	3: {
-		"label":   "Long Trail",
-		"desc":    "Object trails grow twice as long.",
-		"cost":    15.0,
-		"prereqs": [1],
-		"effect":  "trail_length",
-		"value":   40,
-	},
-	6: {
-		"label":   "Comet Trail",
-		"desc":    "Trails extended further and brighter.",
-		"cost":    35.0,
-		"prereqs": [3],
-		"effect":  "trail_length",
-		"value":   70,
+		"label":  "Gravity Well",
+		"branch": "pull",
+		"levels": [
+			{ "effect": "pull_radius", "value": 1.2,   "cost_energy": 30,   "unlock_mass": 80    },
+			{ "effect": "pull_radius", "value": 1.5,   "cost_energy": 70,   "unlock_mass": 300   },
+			{ "effect": "pull_radius", "value": 1.8,   "cost_energy": 140,  "unlock_mass": 700   },
+			{ "effect": "pull_radius", "value": 2.2,   "cost_energy": 280,  "unlock_mass": 1500  },
+		]
 	},
 	4: {
-		"label":   "Weakened Resist",
-		"desc":    "All objects are 30% less likely to resist nudges.",
-		"cost":    25.0,
-		"prereqs": [1],
-		"effect":  "nudge_resist_reduction",
-		"value":   0.3,
+		"label":  "Event Horizon",
+		"branch": "pull",
+		"levels": [
+			{ "effect": "lock_range",  "value": 1.0,   "cost_energy": 50,   "unlock_mass": 200   },
+			{ "effect": "lock_range",  "value": 1.5,   "cost_energy": 100,  "unlock_mass": 600   },
+			{ "effect": "lock_range",  "value": 2.0,   "cost_energy": 200,  "unlock_mass": 1200  },
+			{ "effect": "lock_range",  "value": 2.5,   "cost_energy": 400,  "unlock_mass": 2500  },
+		]
+	},
+
+	# ── FEAST ─────────────────────────────────────────────────────────────────
+
+	5: {
+		"label":  "Rapid Spawn",
+		"branch": "feast",
+		"levels": [
+			{ "effect": "spawn_rate",  "value": 0.8,   "cost_energy": 15,   "unlock_mass": 100   },
+			{ "effect": "spawn_rate",  "value": 0.65,  "cost_energy": 35,   "unlock_mass": 250   },
+			{ "effect": "spawn_rate",  "value": 0.5,   "cost_energy": 80,   "unlock_mass": 600   },
+			{ "effect": "spawn_rate",  "value": 0.35,  "cost_energy": 160,  "unlock_mass": 1500  },
+		]
+	},
+	6: {
+		"label":  "Dense Matter",
+		"branch": "feast",
+		"levels": [
+			{ "effect": "mass_multi",  "value": 0.2,   "cost_energy": 20,   "unlock_mass": 120   },
+			{ "effect": "mass_multi",  "value": 0.5,   "cost_energy": 45,   "unlock_mass": 350   },
+			{ "effect": "mass_multi",  "value": 1.0,   "cost_energy": 90,   "unlock_mass": 800   },
+			{ "effect": "mass_multi",  "value": 1.8,   "cost_energy": 180,  "unlock_mass": 2000  },
+		]
 	},
 	7: {
-		"label":   "Broken Resist",
-		"desc":    "Resistance is reduced by a further 50%.",
-		"cost":    50.0,
-		"prereqs": [4],
-		"effect":  "nudge_resist_reduction",
-		"value":   0.8,
+		"label":  "Storm Surge",
+		"branch": "feast",
+		"levels": [
+			{ "effect": "storm_interval", "value": 60.0,  "cost_energy": 40,  "unlock_mass": 300  },
+			{ "effect": "storm_interval", "value": 45.0,  "cost_energy": 90,  "unlock_mass": 700  },
+			{ "effect": "storm_interval", "value": 30.0,  "cost_energy": 180, "unlock_mass": 1500 },
+			{ "effect": "storm_interval", "value": 15.0,  "cost_energy": 350, "unlock_mass": 3000 },
+		]
 	},
 	8: {
-		"label":   "Tier Unlock",
-		"desc":    "Unlocks the next class of objects to spawn.",
-		"cost":    80.0,
-		"prereqs": [5, 6, 7],
-		"effect":  "unlock_tier",
-		"value":   1,
+		"label":  "Cascade",
+		"branch": "feast",
+		"levels": [
+			{ "effect": "cascade_chance", "value": 0.15,  "cost_energy": 60,  "unlock_mass": 400  },
+			{ "effect": "cascade_chance", "value": 0.30,  "cost_energy": 130, "unlock_mass": 900  },
+			{ "effect": "cascade_chance", "value": 0.45,  "cost_energy": 260, "unlock_mass": 2000 },
+			{ "effect": "cascade_chance", "value": 0.60,  "cost_energy": 500, "unlock_mass": 4500 },
+		]
 	},
+
+	# ── SIGNAL ────────────────────────────────────────────────────────────────
+
 	9: {
-		"label":   "Spawn Surge",
-		"desc":    "Objects spawn 25% faster.",
-		"cost":    40.0,
-		"prereqs": [8],
-		"effect":  "spawn_rate",
-		"value":   0.75,
+		"label":  "Impact Flash",
+		"branch": "signal",
+		"levels": [
+			{ "effect": "flash_intensity", "value": 0.25,  "cost_energy": 30,  "unlock_mass": 500  },
+			{ "effect": "flash_intensity", "value": 0.50,  "cost_energy": 70,  "unlock_mass": 1000 },
+			{ "effect": "flash_intensity", "value": 0.75,  "cost_energy": 140, "unlock_mass": 2000 },
+			{ "effect": "flash_intensity", "value": 1.0,   "cost_energy": 280, "unlock_mass": 4000 },
+		]
 	},
 	10: {
-		"label":   "Energy Surge",
-		"desc":    "Earn 50% more energy per absorption.",
-		"cost":    40.0,
-		"prereqs": [8],
-		"effect":  "energy_gain",
-		"value":   1.5,
+		"label":  "Mass Numbers",
+		"branch": "signal",
+		"levels": [
+			{ "effect": "float_numbers",  "value": 1.0,   "cost_energy": 25,  "unlock_mass": 500  },
+			{ "effect": "float_numbers",  "value": 2.0,   "cost_energy": 55,  "unlock_mass": 1200 },
+			{ "effect": "float_numbers",  "value": 3.0,   "cost_energy": 110, "unlock_mass": 2500 },
+			{ "effect": "float_numbers",  "value": 4.0,   "cost_energy": 220, "unlock_mass": 5000 },
+		]
 	},
 	11: {
-		"label":   "Pull Strength",
-		"desc":    "Black hole absorbs objects at closer range.",
-		"cost":    40.0,
-		"prereqs": [8],
-		"effect":  "pull_strength",
-		"value":   1.4,
+		"label":  "Crit Absorption",
+		"branch": "signal",
+		"levels": [
+			{ "effect": "crit_chance",    "value": 0.10,  "cost_energy": 50,  "unlock_mass": 600  },
+			{ "effect": "crit_chance",    "value": 0.15,  "cost_energy": 110, "unlock_mass": 1500 },
+			{ "effect": "crit_chance",    "value": 0.20,  "cost_energy": 220, "unlock_mass": 3000 },
+			{ "effect": "crit_chance",    "value": 0.25,  "cost_energy": 440, "unlock_mass": 6000 },
+		]
 	},
 	12: {
-		"label":   "Singularity",
-		"desc":    "All systems at maximum. The end begins.",
-		"cost":    200.0,
-		"prereqs": [9, 10, 11],
-		"effect":  "singularity",
-		"value":   1,
+		"label":  "Combo Chain",
+		"branch": "signal",
+		"levels": [
+			{ "effect": "combo_window",   "value": 2.0,   "cost_energy": 70,  "unlock_mass": 800  },
+			{ "effect": "combo_window",   "value": 1.75,  "cost_energy": 150, "unlock_mass": 2000 },
+			{ "effect": "combo_window",   "value": 1.5,   "cost_energy": 300, "unlock_mass": 4000 },
+			{ "effect": "combo_window",   "value": 1.25,  "cost_energy": 600, "unlock_mass": 8000 },
+		]
+	},
+
+	# ── ESCALATION ────────────────────────────────────────────────────────────
+
+	13: {
+		"label":  "Rare Objects",
+		"branch": "escalation",
+		"levels": [
+			{ "effect": "rare_chance",    "value": 0.05,  "cost_energy": 100,  "unlock_mass": 2000  },
+			{ "effect": "rare_chance",    "value": 0.10,  "cost_energy": 220,  "unlock_mass": 4000  },
+			{ "effect": "rare_chance",    "value": 0.15,  "cost_energy": 440,  "unlock_mass": 8000  },
+			{ "effect": "rare_chance",    "value": 0.20,  "cost_energy": 880,  "unlock_mass": 15000 },
+		]
+	},
+	14: {
+		"label":  "Gravity Storm",
+		"branch": "escalation",
+		"levels": [
+			{ "effect": "gstorm_strength", "value": 1.5,  "cost_energy": 120,  "unlock_mass": 2500  },
+			{ "effect": "gstorm_strength", "value": 2.5,  "cost_energy": 260,  "unlock_mass": 5000  },
+			{ "effect": "gstorm_strength", "value": 4.0,  "cost_energy": 520,  "unlock_mass": 10000 },
+			{ "effect": "gstorm_strength", "value": 6.0,  "cost_energy": 1000, "unlock_mass": 20000 },
+		]
+	},
+	15: {
+		"label":  "Singularity Pull",
+		"branch": "escalation",
+		"levels": [
+			{ "effect": "sing_duration",  "value": 3.0,   "cost_energy": 150,  "unlock_mass": 3000  },
+			{ "effect": "sing_duration",  "value": 5.0,   "cost_energy": 330,  "unlock_mass": 6000  },
+			{ "effect": "sing_duration",  "value": 8.0,   "cost_energy": 660,  "unlock_mass": 12000 },
+			{ "effect": "sing_duration",  "value": 12.0,  "cost_energy": 1300, "unlock_mass": 25000 },
+		]
+	},
+	16: {
+		"label":  "Collapse",
+		"branch": "escalation",
+		"levels": [
+			{ "effect": "collapse_unlock", "value": 1.0,  "cost_energy": 0,    "unlock_mass": 50000 },
+		]
 	},
 }
 
-func _ready() -> void:
-	_apply_csv()
+func get_level_data(id: int, level: int) -> Dictionary:
+	var skill: Dictionary = SKILLS.get(id, {})
+	var levels: Array = skill.get("levels", [])
+	if level < 1 or level > levels.size():
+		return {}
+	return levels[level - 1]
 
-func _apply_csv() -> void:
-	const PATH := "res://data/skill_data.csv"
-
-	if not FileAccess.file_exists(PATH):
-		push_warning("SkillData: %s not found, using hardcoded values." % PATH)
-		return
-
-	var file := FileAccess.open(PATH, FileAccess.READ)
-	if not file:
-		push_error("SkillData: could not open %s" % PATH)
-		return
-
-	file.get_line()  # skip header
-
-	var patched := 0
-	while not file.eof_reached():
-		var line := file.get_line().strip_edges()
-		if line.is_empty():
-			continue
-		var c := line.split(",")
-		if c.size() < 4:
-			continue
-		var id    := int(c[0])
-		var cost  := float(c[2])
-		var value := float(c[3])
-		if NODES.has(id):
-			NODES[id]["cost"]  = cost
-			NODES[id]["value"] = value
-			patched += 1
-		else:
-			push_warning("SkillData: CSV has id %d but no matching NODES entry" % id)
-
-	file.close()
-	print("SkillData: patched %d skills from CSV" % patched)
-
-func get_skill_node(id: int) -> Dictionary:
-	return NODES.get(id, {})
+func get_max_level(id: int) -> int:
+	return SKILLS.get(id, {}).get("levels", []).size()
 
 func get_all_ids() -> Array:
-	return NODES.keys()
+	return SKILLS.keys()
+
+func get_skill(id: int) -> Dictionary:
+	return SKILLS.get(id, {})

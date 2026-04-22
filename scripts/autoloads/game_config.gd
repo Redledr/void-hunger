@@ -15,7 +15,7 @@ extends Node
 ## Orbit radius reduction per second applied to all objects passively.
 @export var passive_pull_base:        float = 0.3
 ## Additional pull per unit of black hole mass (scales pull with size).
-@export var passive_pull_scale:       float = 0.0
+@export var passive_pull_scale:       float = 5
 
 # ── Orbit ─────────────────────────────────────────────────────────────────────
 @export_group("Orbit")
@@ -122,9 +122,10 @@ extends Node
 ## Mass target used to calculate the mid-game ETA in the debug overlay.
 @export var debug_eta_target_mass:    float = 500.0
 ## How often (seconds) absorb rate and mass-per-absorb are recalculated.
-@export var debug_sample_window:      float = 10.0
+@export var debug_sample_window:      float = 1.0
 
 # ── Currency ──────────────────────────────────────────────────────────────────
 @export_group("Currency")
 ## Starting energy injected for testing the skill tree without grinding.
 @export var test_energy:              float = 500.0
+@export var test_mass:                float = 500.0
